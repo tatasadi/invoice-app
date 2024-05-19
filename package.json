@@ -11,6 +11,7 @@
 		"build-storybook": "storybook build"
 	},
 	"dependencies": {
+		"@radix-ui/react-slot": "^1.0.2",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
 		"lucide-react": "^0.378.0",
@@ -26,6 +27,8 @@
 		"@storybook/addon-interactions": "^8.1.1",
 		"@storybook/addon-links": "^8.1.1",
 		"@storybook/addon-onboarding": "^8.1.1",
+		"@storybook/addon-styling-webpack": "^1.0.0",
+		"@storybook/addon-themes": "^8.1.1",
 		"@storybook/blocks": "^8.1.1",
 		"@storybook/nextjs": "^8.1.1",
 		"@storybook/react": "^8.1.1",

@@ -52,6 +52,7 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "light-bg": "#F9FAFE",
         "purple-primary": "hsl(252, 94%, 67%)", // #7C5DFA
         "purple-secondary": "hsl(252, 100%, 73%)", // #9277FF
         "navy-dark": "hsl(233, 31%, 17%)", // #1E2139
