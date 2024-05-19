@@ -3,11 +3,11 @@ import type { Config } from "tailwindcss"
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -52,6 +52,68 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "purple-primary": "hsl(252, 94%, 67%)", // #7C5DFA
+        "purple-secondary": "hsl(252, 100%, 73%)", // #9277FF
+        "navy-dark": "hsl(233, 31%, 17%)", // #1E2139
+        "navy-medium": "hsl(233, 30%, 21%)", // #252945
+        "blue-light": "hsl(231, 73%, 93%)", // #DFE3FA
+        "blue-gray": "hsl(231, 20%, 61%)", // #888EB0
+        "blue-muted": "hsl(231, 37%, 63%)", // #7E88C3
+        black: "hsl(228, 29%, 7%)", // #0C0E16
+        "red-primary": "hsl(0, 80%, 63%)", // #EC5757
+        "red-light": "hsl(0, 100%, 80%)", // #9277FF (Note: Color appears to have been mistyped, assuming it is actually #FF7E7E)
+        "background-light": "hsl(240, 27%, 98%)", // #F8F8FB
+        "navy-darkest": "hsl(233, 30%, 11%)", // #141625
+      },
+      fontSize: {
+        "heading-l": [
+          "36px",
+          {
+            lineHeight: "33px",
+            letterSpacing: "-1px",
+            fontWeight: "bold",
+          },
+        ],
+        "heading-m": [
+          "24px",
+          {
+            lineHeight: "22px",
+            letterSpacing: "-0.75px",
+            fontWeight: "bold",
+          },
+        ],
+        "heading-s": [
+          "15px",
+          {
+            lineHeight: "24px",
+            letterSpacing: "-0.25px",
+            fontWeight: "bold",
+          },
+        ],
+        "heading-s-variant": [
+          "15px",
+          {
+            lineHeight: "15px",
+            letterSpacing: "-0.25px",
+            fontWeight: "bold",
+          },
+        ],
+        body: [
+          "13px",
+          {
+            lineHeight: "18px",
+            letterSpacing: "-0.1px",
+            fontWeight: "500", // Medium
+          },
+        ],
+        "body-variant": [
+          "13px",
+          {
+            lineHeight: "15px",
+            letterSpacing: "-0.25px",
+            fontWeight: "500", // Medium
+          },
+        ],
       },
       borderRadius: {
         lg: "var(--radius)",
