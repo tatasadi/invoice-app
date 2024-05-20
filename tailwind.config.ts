@@ -62,7 +62,7 @@ const config = {
         "blue-muted": "hsl(231, 37%, 63%)", // #7E88C3
         black: "hsl(228, 29%, 7%)", // #0C0E16
         "red-primary": "hsl(0, 80%, 63%)", // #EC5757
-        "red-light": "hsl(0, 100%, 80%)", // #9277FF (Note: Color appears to have been mistyped, assuming it is actually #FF7E7E)
+        "red-light": "hsl(0, 100%, 80%)", // #9277FF
         "background-light": "hsl(240, 27%, 98%)", // #F8F8FB
         "navy-darkest": "hsl(233, 30%, 11%)", // #141625
       },
