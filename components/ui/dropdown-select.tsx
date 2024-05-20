@@ -43,7 +43,8 @@ export function DropdownSelect({
     } else if (event.key === "ArrowDown") {
       event.preventDefault()
       setIsOpen(true)
-      listRef.current?.firstChild?.focus()
+      const firstChild = listRef.current?.firstChild as HTMLElement | null
+      firstChild?.focus()
     } else if (event.key === "Escape") {
       setIsOpen(false)
       buttonRef.current?.focus()
