@@ -92,7 +92,7 @@ export function DropdownSelect({
       <div className="flex items-center">
         <button
           ref={buttonRef}
-          className="block w-full appearance-none rounded border border-blue-light bg-white px-5 py-4 pr-10 text-left focus:border-purple-primary focus:outline-none focus:ring-indigo-500"
+          className="block w-full appearance-none rounded border border-blue-light bg-background px-5 py-4 pr-10 text-left text-foreground focus:border-purple-primary focus:outline-none focus:ring-indigo-500"
           onClick={() => setIsOpen(!isOpen)}
           onKeyDown={handleKeyDown}
           aria-haspopup="listbox"
@@ -115,7 +115,7 @@ export function DropdownSelect({
       {isOpen && (
         <ul
           ref={listRef}
-          className="absolute z-10 mt-6 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 shadow-[0_10px_20px_0_rgba(72,84,159,0.25)]"
+          className="absolute z-10 mt-6 max-h-60 w-full overflow-auto rounded-lg bg-background py-1 shadow-[0_10px_20px_0_rgba(72,84,159,0.25)]"
           role="listbox"
           tabIndex={-1}
         >
@@ -125,8 +125,10 @@ export function DropdownSelect({
               role="option"
               tabIndex={0}
               aria-selected={selected === option.value}
-              className={`cursor-pointer select-none border-b border-blue-light px-6 py-4 last:border-b-0 hover:text-purple-primary ${
-                selected === option.value ? "text-purple-primary" : ""
+              className={`cursor-pointer select-none border-b border-blue-light px-6 py-4 last:border-b-0 hover:text-purple-primary dark:border-navy-dark ${
+                selected === option.value
+                  ? "text-purple-primary"
+                  : "text-foreground"
               }`}
               onClick={() => handleChange(option.value)}
               onKeyDown={(event) => handleOptionKeyDown(event, option.value)}
