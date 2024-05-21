@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { League_Spartan } from "next/font/google"
 import "./globals.css"
+import { ThemeProvider } from "./theme-provider"
 
 const leagueSpartan = League_Spartan({ subsets: ["latin"] })
 
@@ -16,7 +17,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${leagueSpartan.className} text-body`}>{children}</body>
+      <body className={`${leagueSpartan.className} text-body`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   )
 }

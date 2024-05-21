@@ -65,6 +65,8 @@ const config = {
         "red-light": "hsl(0, 100%, 80%)", // #9277FF
         "background-light": "hsl(240, 27%, 98%)", // #F8F8FB
         "navy-darkest": "hsl(233, 30%, 11%)", // #141625
+        "navy-muted": "#373B53",
+        "navy-muted-dark": "#494E6E",
       },
       fontSize: {
         "heading-l": [

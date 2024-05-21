@@ -1,3 +1,9 @@
+import Navbar from "@/components/sections/navbar"
+
 export default function Home() {
-  return <main className="">Hello World!</main>
+  return (
+    <main className="">
+      <Navbar />
+    </main>
+  )
 }
