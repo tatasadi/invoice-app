@@ -67,6 +67,8 @@ const config = {
         "navy-darkest": "hsl(233, 30%, 11%)", // #141625
         "navy-muted": "#373B53",
         "navy-muted-dark": "#494E6E",
+        "green-light": "#33D69F",
+        "orange-light": "#FF8F00",
       },
       fontSize: {
         "heading-l": [
