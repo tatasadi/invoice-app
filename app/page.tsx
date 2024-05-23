@@ -1,10 +1,14 @@
 import InvoicesTable from "@/components/sections/invoices-table"
 import Navbar from "@/components/sections/navbar"
-import { InvoiceTableSkeleton } from "@/components/skeletons"
+import {
+  InvoiceTableSkeleton,
+  TotalInvoicesSkeleton,
+} from "@/components/skeletons"
 import { Button } from "@/components/ui/button"
 import ButtonIcon from "@/components/ui/button-icon"
 import { Suspense } from "react"
 import iconPlus from "@/public/img/icon-plus.svg"
+import TotalInvoices from "@/components/total-invoices"
 
 export default function Home() {
   return (
@@ -16,9 +20,9 @@ export default function Home() {
             <h1 className="mb-[0.19rem] text-heading-l font-bold text-black dark:text-white sm:mb-[0.38rem]">
               Invoices
             </h1>
-            <p className="text-[0.8125rem] leading-[0.9375rem] tracking-[-0.00625rem] text-blue-gray dark:text-blue-light">
-              No invoices
-            </p>
+            <Suspense fallback={<TotalInvoicesSkeleton />}>
+              <TotalInvoices />
+            </Suspense>
           </div>
           <div className="ml-auto mr-10">Filter</div>
           <Button variant="primary" size="withIcon">

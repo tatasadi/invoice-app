@@ -21,3 +21,11 @@ export function InvoiceTableSkeleton() {
     </div>
   )
 }
+
+export function TotalInvoicesSkeleton() {
+  return (
+    <div className="flex items-center">
+      <Skeleton className="h-4 w-40" />
+    </div>
+  )
+}
