@@ -2,6 +2,8 @@ import { Invoice } from "@prisma/client"
 import prisma from "./db"
 import { unstable_noStore as noStore } from "next/cache"
 
+//await new Promise((resolve) => setTimeout(resolve, 3000))
+
 export async function fetchLatestInvoices(): Promise<Invoice[]> {
   noStore()
   try {

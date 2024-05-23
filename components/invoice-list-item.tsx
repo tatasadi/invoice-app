@@ -13,7 +13,7 @@ const InvoiceListItem = ({ invoice }: { invoice: Invoice }) => {
   }
 
   return (
-    <div className="grid cursor-pointer grid-cols-2 place-items-start rounded-lg bg-white p-6 shadow-[0px_10px_10px_-10px_rgba(72,84,159,0.10)] dark:bg-navy-dark sm:grid-cols-[repeat(5,1fr)_10px] sm:place-items-center sm:gap-6">
+    <div className="grid cursor-pointer grid-cols-2 place-items-start rounded-lg border border-transparent bg-white p-6 shadow-[0px_10px_10px_-10px_rgba(72,84,159,0.10)] hover:border-purple-primary dark:bg-navy-dark sm:grid-cols-[repeat(5,1fr)_10px] sm:place-items-center sm:gap-6">
       <h3 className="row-span-2 mb-6 text-[0.9375rem] font-bold tracking-[-0.01562rem] text-black dark:text-white sm:row-span-1 sm:mb-0 sm:justify-self-start">
         <span className="text-blue-muted">#</span>
         {invoice.id}
