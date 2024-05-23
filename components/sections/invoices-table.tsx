@@ -4,8 +4,9 @@ import InvoiceListItem from "../invoice-list-item"
 import illustrationEmpty from "@/public/img/illustration-empty.svg"
 import Image from "next/image"
 
-export default async function InvoicesTable() {
-  const invoices = await fetchLatestInvoices()
+export default async function InvoicesTable({ status }: { status?: string[] }) {
+  console.log(status)
+  const invoices = await fetchLatestInvoices(status)
   if (invoices.length === 0)
     return (
       <div className="mt-[9.19rem] flex flex-col items-center">

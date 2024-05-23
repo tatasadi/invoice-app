@@ -9,8 +9,15 @@ import ButtonIcon from "@/components/ui/button-icon"
 import { Suspense } from "react"
 import iconPlus from "@/public/img/icon-plus.svg"
 import TotalInvoices from "@/components/total-invoices"
+import FilterDropdown from "@/components/filter-dropdown"
 
-export default function Home() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: { status?: string }
+}) {
+  const status = searchParams?.status?.split(",") || []
+
   return (
     <main className="relative mx-auto min-h-screen bg-background">
       <Navbar />
@@ -24,7 +31,9 @@ export default function Home() {
               <TotalInvoices />
             </Suspense>
           </div>
-          <div className="ml-auto mr-10">Filter</div>
+          <div className="ml-auto mr-10">
+            <FilterDropdown />
+          </div>
           <Button variant="primary" size="withIcon">
             <ButtonIcon icon={iconPlus} alt="icon plus" />
             New<span className="ml-1 hidden sm:inline-block">Invoice</span>
@@ -32,7 +41,7 @@ export default function Home() {
         </div>
 
         <Suspense fallback={<InvoiceTableSkeleton />}>
-          <InvoicesTable />
+          <InvoicesTable status={status} />
         </Suspense>
       </div>
     </main>

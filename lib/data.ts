@@ -2,13 +2,17 @@ import { Invoice } from "@prisma/client"
 import prisma from "./db"
 import { unstable_noStore as noStore } from "next/cache"
 
-export async function fetchLatestInvoices(): Promise<Invoice[]> {
+export async function fetchLatestInvoices(
+  status?: string[],
+): Promise<Invoice[]> {
   noStore()
-
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-
   try {
     const invoices = await prisma.invoice.findMany({
+      where: {
+        status: {
+          in: status && status.length > 0 ? status : undefined,
+        },
+      },
       orderBy: {
         createdAt: "asc",
       },
@@ -28,8 +32,7 @@ export async function fetchLatestInvoices(): Promise<Invoice[]> {
 
 export async function fetchInvoicesCount(): Promise<number> {
   noStore()
-
-  await new Promise((resolve) => setTimeout(resolve, 1000))
+  //await new Promise((resolve) => setTimeout(resolve, 1000))
 
   try {
     const count = await prisma.invoice.count()
