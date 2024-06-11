@@ -5,7 +5,6 @@ import illustrationEmpty from "@/public/img/illustration-empty.svg"
 import Image from "next/image"
 
 export default async function InvoicesTable({ status }: { status?: string[] }) {
-  console.log(status)
   const invoices = await fetchLatestInvoices(status)
   if (invoices.length === 0)
     return (

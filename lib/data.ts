@@ -6,6 +6,8 @@ export async function fetchLatestInvoices(
   status?: string[],
 ): Promise<Invoice[]> {
   noStore()
+  //await new Promise((resolve) => setTimeout(resolve, 1000))
+
   try {
     const invoices = await prisma.invoice.findMany({
       where: {
@@ -40,5 +42,27 @@ export async function fetchInvoicesCount(): Promise<number> {
   } catch (error) {
     console.error("Error retrieving invoice count:", error)
     throw new Error("Error retrieving invoice count")
+  }
+}
+
+export async function fetchInvoiceById(id: string): Promise<Invoice> {
+  noStore()
+  //await new Promise((resolve) => setTimeout(resolve, 1000))
+
+  try {
+    const invoice = await prisma.invoice.findUnique({
+      where: {
+        id,
+      },
+    })
+
+    if (!invoice) {
+      throw new Error("Invoice not found")
+    }
+
+    return invoice
+  } catch (error) {
+    console.error("Error retrieving invoice by id:", error)
+    throw new Error("Error retrieving invoice by id")
   }
 }

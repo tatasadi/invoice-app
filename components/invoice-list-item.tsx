@@ -3,17 +3,15 @@ import { Invoice } from "@prisma/client"
 import React from "react"
 import iconArrowRight from "@/public/img/icon-arrow-right.svg"
 import Image from "next/image"
+import Link from "next/link"
+import StatusBadge from "./status-badge"
 
 const InvoiceListItem = ({ invoice }: { invoice: Invoice }) => {
-  const statusClass = {
-    paid: "bg-green-light/5 text-green-light",
-    pending: "bg-orange-light/5 text-orange-light",
-    draft:
-      "bg-navy-muted/5 text-navy-muted dark:bg-blue-light/5 dark:text-blue-light",
-  }
-
   return (
-    <div className="grid cursor-pointer grid-cols-2 place-items-start rounded-lg border border-transparent bg-white p-6 shadow-[0px_10px_10px_-10px_rgba(72,84,159,0.10)] hover:border-purple-primary dark:bg-navy-dark sm:grid-cols-[repeat(5,1fr)_10px] sm:place-items-center sm:gap-6">
+    <Link
+      href={`/invoice/${invoice.id}`}
+      className="grid cursor-pointer grid-cols-2 place-items-start rounded-lg border border-transparent bg-card p-6 shadow-[0px_10px_10px_-10px_rgba(72,84,159,0.10)] hover:border-purple-primary sm:grid-cols-[repeat(5,1fr)_10px] sm:place-items-center sm:gap-6"
+    >
       <h3 className="row-span-2 mb-6 text-[0.9375rem] font-bold tracking-[-0.01562rem] text-black dark:text-white sm:row-span-1 sm:mb-0 sm:justify-self-start">
         <span className="text-blue-muted">#</span>
         {invoice.id}
@@ -32,20 +30,16 @@ const InvoiceListItem = ({ invoice }: { invoice: Invoice }) => {
       <p className="row-start-4 text-left text-[0.9375rem] font-bold leading-6 tracking-[-0.01562rem] text-black dark:text-white sm:col-start-4 sm:row-start-1 sm:text-right">
         {formatCurrency(invoice.total)}
       </p>
-      <div
-        className={`col-start-2 row-span-2 flex w-[6.5rem] items-center justify-center gap-2 place-self-end rounded-md px-6 py-3 sm:col-start-5 sm:row-span-1 ${statusClass[invoice.status as keyof typeof statusClass]}`}
-      >
-        <span className="h-2 w-2 rounded-full bg-current"></span>
-        <span>
-          {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
-        </span>
-      </div>
+      <StatusBadge
+        status={invoice.status}
+        className="col-start-2 row-span-2 w-[7rem] place-self-end sm:col-start-5 sm:row-span-1"
+      />
       <Image
         src={iconArrowRight}
         alt="icon arrow right"
         className="hidden h-3 w-2 justify-self-end sm:block"
       />
-    </div>
+    </Link>
   )
 }
 
