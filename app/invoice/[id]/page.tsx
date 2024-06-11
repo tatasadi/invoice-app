@@ -8,7 +8,7 @@ import Link from "next/link"
 export default async function Page({ params }: { params: { id: string } }) {
   const id = params.id
   const invoice = await fetchInvoiceById(id)
-  const { status } = invoice
+  const { status, description, senderAddress: sender } = invoice
 
   return (
     <>
@@ -25,6 +25,23 @@ export default async function Page({ params }: { params: { id: string } }) {
           <Button>Edit</Button>
           <Button variant="destructive">Delete</Button>
           <Button variant="primary">Mark as Paid</Button>
+        </div>
+      </div>
+      <div className="mt-4 bg-card p-6 sm:p-12">
+        <div className="sm:flex sm:justify-between">
+          <div>
+            <h2>
+              <span className="text-secondary">#</span>
+              {id}
+            </h2>
+            <p className="heading-s text-secondary">{description}</p>
+          </div>
+          <div className="pt-7 text-secondary sm:pt-0 sm:text-right">
+            <p>{sender.street}</p>
+            <p>{sender.city}</p>
+            <p>{sender.postCode}</p>
+            <p>{sender.country}</p>
+          </div>
         </div>
       </div>
       <pre>{JSON.stringify(invoice, null, 2)}</pre>

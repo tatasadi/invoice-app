@@ -1,6 +1,12 @@
-import { Invoice } from "@prisma/client"
+import { Address, Invoice, Item } from "@prisma/client"
 import prisma from "./db"
 import { unstable_noStore as noStore } from "next/cache"
+
+type InvoiceWithRelations = Invoice & {
+  senderAddress: Address
+  clientAddress: Address
+  items: Item[]
+}
 
 export async function fetchLatestInvoices(
   status?: string[],
@@ -45,14 +51,20 @@ export async function fetchInvoicesCount(): Promise<number> {
   }
 }
 
-export async function fetchInvoiceById(id: string): Promise<Invoice> {
+// get invoce by id with sender address and client address and items
+export async function fetchInvoiceById(
+  id: string,
+): Promise<InvoiceWithRelations> {
   noStore()
   //await new Promise((resolve) => setTimeout(resolve, 1000))
 
   try {
     const invoice = await prisma.invoice.findUnique({
-      where: {
-        id,
+      where: { id },
+      include: {
+        senderAddress: true,
+        clientAddress: true,
+        items: true,
       },
     })
 

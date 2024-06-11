@@ -24,7 +24,7 @@ export default function RootLayout({
           defaultTheme="light"
           disableTransitionOnChange
         >
-          <main className="relative mx-auto min-h-screen bg-background">
+          <main className="relative mx-auto min-h-screen bg-background text-body">
             <Navbar />
             <div className="mx-auto max-w-[60rem] px-6 py-8 lg:pl-[8rem]">
               {children}
