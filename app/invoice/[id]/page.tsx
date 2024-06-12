@@ -2,6 +2,7 @@ import GoBack from "@/components/go-back"
 import StatusBadge from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import { fetchInvoiceById } from "@/lib/data"
+import { formatDate } from "@/lib/utils"
 import { notFound } from "next/navigation"
 
 export default async function Page({ params }: { params: { id: string } }) {
@@ -11,7 +12,16 @@ export default async function Page({ params }: { params: { id: string } }) {
   if (!invoice) {
     notFound()
   }
-  const { status, description, senderAddress: sender } = invoice
+  const {
+    status,
+    description,
+    senderAddress,
+    clientAddress,
+    createdAt,
+    paymentDue,
+    clientName,
+    clientEmail,
+  } = invoice
 
   return (
     <>
@@ -37,10 +47,32 @@ export default async function Page({ params }: { params: { id: string } }) {
             <p className="heading-s text-secondary">{description}</p>
           </div>
           <div className="pt-7 text-secondary sm:pt-0 sm:text-right">
-            <p>{sender.street}</p>
-            <p>{sender.city}</p>
-            <p>{sender.postCode}</p>
-            <p>{sender.country}</p>
+            <p>{senderAddress.street}</p>
+            <p>{senderAddress.city}</p>
+            <p>{senderAddress.postCode}</p>
+            <p>{senderAddress.country}</p>
+          </div>
+        </div>
+        <div className="mt-8 grid grid-cols-2 sm:mt-5 sm:grid-cols-3">
+          <div>
+            <h3 className="text-secondary">Invoice Date</h3>
+            <p className="mt-3 font-bold">{formatDate(createdAt)}</p>
+            <h3 className="mt-8 text-secondary">Payment Due</h3>
+            <p className="mt-3 font-bold">{formatDate(paymentDue)}</p>
+          </div>
+          <div>
+            <h3 className="text-secondary">Bill To</h3>
+            <p className="mt-3 font-bold">{clientName}</p>
+            <div className="mt-2 text-secondary">
+              <p>{clientAddress.street}</p>
+              <p>{clientAddress.city}</p>
+              <p>{clientAddress.postCode}</p>
+              <p>{clientAddress.country}</p>
+            </div>
+          </div>
+          <div className="mt-8 sm:mt-0">
+            <h3 className="text-secondary">Sent to</h3>
+            <p className="mt-3 font-bold">{clientEmail}</p>
           </div>
         </div>
       </div>
