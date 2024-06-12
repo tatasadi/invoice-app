@@ -1,21 +1,21 @@
+import GoBack from "@/components/go-back"
 import StatusBadge from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import { fetchInvoiceById } from "@/lib/data"
-import iconArrowLeft from "@/public/img/icon-arrow-left.svg"
-import Image from "next/image"
-import Link from "next/link"
+import { notFound } from "next/navigation"
 
 export default async function Page({ params }: { params: { id: string } }) {
   const id = params.id
   const invoice = await fetchInvoiceById(id)
+
+  if (!invoice) {
+    notFound()
+  }
   const { status, description, senderAddress: sender } = invoice
 
   return (
     <>
-      <Link href="/" className="flex gap-6">
-        <Image src={iconArrowLeft} alt="icon arrow left" className="h-3 w-2" />{" "}
-        Go back
-      </Link>
+      <GoBack href="/" />
       <div className="mt-8 rounded-lg bg-card p-6 sm:flex sm:justify-between sm:p-8">
         <div className="flex items-center justify-between gap-5 sm:justify-start">
           <p>Status</p>

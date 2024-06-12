@@ -2,7 +2,7 @@ import { Address, Invoice, Item } from "@prisma/client"
 import prisma from "./db"
 import { unstable_noStore as noStore } from "next/cache"
 
-type InvoiceWithRelations = Invoice & {
+export type InvoiceWithRelations = Invoice & {
   senderAddress: Address
   clientAddress: Address
   items: Item[]
@@ -52,9 +52,7 @@ export async function fetchInvoicesCount(): Promise<number> {
 }
 
 // get invoce by id with sender address and client address and items
-export async function fetchInvoiceById(
-  id: string,
-): Promise<InvoiceWithRelations> {
+export async function fetchInvoiceById(id: string) {
   noStore()
   //await new Promise((resolve) => setTimeout(resolve, 1000))
 
@@ -67,10 +65,6 @@ export async function fetchInvoiceById(
         items: true,
       },
     })
-
-    if (!invoice) {
-      throw new Error("Invoice not found")
-    }
 
     return invoice
   } catch (error) {
