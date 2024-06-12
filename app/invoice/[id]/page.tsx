@@ -2,7 +2,7 @@ import GoBack from "@/components/go-back"
 import StatusBadge from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import { fetchInvoiceById } from "@/lib/data"
-import { formatDate } from "@/lib/utils"
+import { formatDate, formatCurrency } from "@/lib/utils"
 import { notFound } from "next/navigation"
 
 export default async function Page({ params }: { params: { id: string } }) {
@@ -21,12 +21,14 @@ export default async function Page({ params }: { params: { id: string } }) {
     paymentDue,
     clientName,
     clientEmail,
+    items,
+    total,
   } = invoice
 
   return (
     <>
       <GoBack href="/" />
-      <div className="mt-8 rounded-lg bg-card p-6 sm:flex sm:justify-between sm:p-8">
+      <div className="mt-8 rounded-lg bg-card p-6 shadow-lg sm:flex sm:justify-between sm:p-8">
         <div className="flex items-center justify-between gap-5 sm:justify-start">
           <p>Status</p>
           <StatusBadge status={status} />
@@ -37,7 +39,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           <Button variant="primary">Mark as Paid</Button>
         </div>
       </div>
-      <div className="mt-4 bg-card p-6 sm:p-12">
+      <div className="mb-28 mt-4 rounded-lg bg-card p-6 shadow-lg sm:p-12">
         <div className="sm:flex sm:justify-between">
           <div>
             <h2>
@@ -75,8 +77,46 @@ export default async function Page({ params }: { params: { id: string } }) {
             <p className="mt-3 font-bold">{clientEmail}</p>
           </div>
         </div>
+        <div className="mt-9 rounded-b-lg bg-light-bg dark:bg-navy-medium sm:mt-11 sm:rounded-t-lg">
+          <div className="flex flex-col gap-8 p-8 pb-10">
+            <div className="hidden grid-cols-2 justify-items-end font-medium text-secondary sm:grid sm:grid-cols-5">
+              <div className="col-span-2 justify-self-start font-medium text-secondary">
+                Item Name
+              </div>
+              <div className="justify-self-center font-medium text-secondary">
+                QTY.
+              </div>
+              <div className="font-medium text-secondary">Price</div>
+              <div className="font-medium text-secondary">Total</div>
+            </div>
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="grid grid-cols-2 justify-items-end font-bold sm:grid-cols-5"
+              >
+                <p className="justify-self-start sm:col-span-2">{item.name}</p>
+                <p className="hidden justify-self-center text-secondary sm:block">
+                  {item.quantity}
+                </p>
+                <p className="row-start-2 mt-2 justify-self-start text-secondary sm:row-start-auto sm:mt-0 sm:justify-self-auto">
+                  <span className="sm:hidden">{item.quantity} x </span>
+                  {formatCurrency(item.price)}
+                </p>
+                <p className="row-span-2 self-center sm:row-span-1 sm:self-auto">
+                  {formatCurrency(item.total)}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="rounded-b-lg bg-navy-muted text-white dark:bg-black">
+            <div className="flex items-center justify-between p-6 sm:px-8">
+              <p className="hidden sm:block">Amount Due</p>
+              <p className="sm:hidden">Grand Total</p>
+              <p className="text-heading-s">{formatCurrency(total)}</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <pre>{JSON.stringify(invoice, null, 2)}</pre>
     </>
   )
 }
