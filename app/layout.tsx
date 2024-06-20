@@ -13,8 +13,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode
+  modal: React.ReactNode
 }>) {
   return (
     <html lang="en">
@@ -28,6 +30,7 @@ export default function RootLayout({
             <Navbar />
             <div className="mx-auto max-w-[60rem] px-6 py-8 lg:pl-[8rem]">
               {children}
+              {modal}
             </div>
           </main>
         </ThemeProvider>

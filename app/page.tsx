@@ -9,6 +9,7 @@ import { Suspense } from "react"
 import iconPlus from "@/public/img/icon-plus.svg"
 import TotalInvoices from "@/components/total-invoices"
 import FilterDropdown from "@/components/filter-dropdown"
+import Link from "next/link"
 
 export default async function Page({
   searchParams,
@@ -31,9 +32,11 @@ export default async function Page({
         <div className="ml-auto mr-10">
           <FilterDropdown />
         </div>
-        <Button variant="primary" size="withIcon">
-          <ButtonIcon icon={iconPlus} alt="icon plus" />
-          New<span className="ml-1 hidden sm:inline-block">Invoice</span>
+        <Button variant="primary" size="withIcon" asChild>
+          <Link href="/create">
+            <ButtonIcon icon={iconPlus} alt="icon plus" />
+            New<span className="ml-1 hidden sm:inline-block">Invoice</span>
+          </Link>
         </Button>
       </div>
 

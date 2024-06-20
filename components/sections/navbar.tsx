@@ -5,7 +5,7 @@ import avatar from "@/public/img/image-avatar.jpg"
 
 export default function Navbar() {
   return (
-    <nav className="flex items-center bg-navy-muted lg:fixed lg:min-h-screen lg:w-[6.4375rem] lg:flex-col lg:rounded-r-[1.25rem]">
+    <nav className="relative z-50 flex items-center bg-navy-muted lg:fixed lg:min-h-screen lg:w-[6.4375rem] lg:flex-col lg:rounded-r-[1.25rem]">
       <div className="relative flex items-center justify-center rounded-r-[1.25rem] bg-purple-primary p-8 lg:w-full">
         <div className="absolute inset-0 top-1/2 z-0 rounded-br-[1.25rem] rounded-tl-[1.25rem] bg-purple-secondary"></div>
         <Image src={logo} alt="Logo" className="relative z-10" />
