@@ -15,37 +15,35 @@ import { DropdownSelect } from "@/components/ui/dropdown-select"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { createInvoiceAction } from "@/app/actions"
+import { invoiceSchema } from "@/app/schema"
+import { useState, useTransition } from "react"
+import { start } from "repl"
 
-const schema = z.object({
-  senderAddress: z.object({
-    street: z.string().trim().min(1, { message: "Street is required" }),
-    city: z.string().trim().min(1, { message: "City is required" }),
-    postCode: z.string().trim().min(1, { message: "Post code is required" }),
-    country: z.string().trim().min(1, { message: "Country is required" }),
-  }),
-  clientName: z.string().min(1, { message: "Client's name is required" }),
-  clientEmail: z
-    .string()
-    .min(1, { message: "Client's email is required" })
-    .email(),
-  clientAddress: z.object({
-    street: z.string().trim().min(1, { message: "Street is required" }),
-    city: z.string().trim().min(1, { message: "City is required" }),
-    postCode: z.string().trim().min(1, { message: "Post code is required" }),
-    country: z.string().trim().min(1, { message: "Country is required" }),
-  }),
-  invoiceDate: z.date({ required_error: "Issue date is required" }),
-  paymentTerms: z.string({ required_error: "Please select a payment term" }),
-  description: z.string(),
-})
+// type FormErrors = {
+//   senderAddress?: string[] | undefined
+//   clientName?: string[] | undefined
+//   clientEmail?: string[] | undefined
+//   clientAddress?: string[] | undefined
+//   invoiceDate?: string[] | undefined
+//   paymentTerms?: string[] | undefined
+//   description?: string[] | undefined
+// }
+
+type FormErrors = z.inferFormattedError<typeof invoiceSchema>
 
 export default function InvoiceForm({
   className = "",
 }: {
   className?: string
 }) {
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const [pending, startTransition] = useTransition()
+  const [formErrors, setFormErrors] = useState<FormErrors>({} as FormErrors)
+
+  console.log("formErrors", formErrors)
+
+  const form = useForm<z.infer<typeof invoiceSchema>>({
+    resolver: zodResolver(invoiceSchema),
     defaultValues: {
       senderAddress: {
         street: "",
@@ -67,8 +65,15 @@ export default function InvoiceForm({
     },
   })
 
-  function onSubmit(data: z.infer<typeof schema>) {
-    console.log(data)
+  async function onSubmit(data: z.infer<typeof invoiceSchema>) {
+    startTransition(async () => {
+      const result = await createInvoiceAction(data)
+      if (result?.errors) {
+        setFormErrors(result.errors)
+      } else {
+        setFormErrors({} as FormErrors)
+      }
+    })
   }
 
   return (
@@ -88,6 +93,7 @@ export default function InvoiceForm({
                 id="senderAddress.street"
                 type="text"
                 label="Street Address"
+                error={formErrors.senderAddress?.street?._errors}
                 {...field}
               />
             )}
@@ -215,36 +221,30 @@ export default function InvoiceForm({
           </div>
         </section>
         <section className="mt-10 grid grid-cols-1 gap-6 sm:mt-12 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <FormField
-              control={form.control}
-              name="invoiceDate"
-              render={({ field }) => (
-                <DatePicker label="Issue Date" {...field} />
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <FormField
-              control={form.control}
-              name="paymentTerms"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Payment Terms</FormLabel>
-                  <DropdownSelect
-                    options={[
-                      { value: "net1", label: "Net 1 Day" },
-                      { value: "net7", label: "Net 7 Days" },
-                      { value: "net14", label: "Net 14 Days" },
-                      { value: "net30", label: "Net 30 Days" },
-                    ]}
-                    onSelect={field.onChange}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="invoiceDate"
+            render={({ field }) => <DatePicker label="Issue Date" {...field} />}
+          />
+          <FormField
+            control={form.control}
+            name="paymentTerms"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-1">
+                <FormLabel>Payment Terms</FormLabel>
+                <DropdownSelect
+                  options={[
+                    { value: "1", label: "Net 1 Day" },
+                    { value: "7", label: "Net 7 Days" },
+                    { value: "14", label: "Net 14 Days" },
+                    { value: "30", label: "Net 30 Days" },
+                  ]}
+                  onSelect={field.onChange}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="description"
@@ -259,7 +259,28 @@ export default function InvoiceForm({
             )}
           />
         </section>
-        <Button className="mt-10" variant="primary" type="submit">
+
+        {/* {formErrors && (
+          <div className="mt-6 text-red-500">
+            {Object.values(formErrors).map((error, index) => (
+              <p key={index}>{error}</p>
+            ))}
+          </div>
+        )} */}
+        {/* {formErrors && (
+          <p className="mt-6">
+            {Object.values(formErrors).map((error, index) => (
+              <p key={index}>{error}</p>
+            ))}
+          </p>
+        )} */}
+
+        <Button
+          className="mt-10"
+          variant="primary"
+          type="submit"
+          disabled={pending}
+        >
           Submit
         </Button>
       </form>

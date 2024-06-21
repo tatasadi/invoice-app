@@ -24,7 +24,7 @@ export async function fetchLatestInvoices(
       orderBy: {
         createdAt: "asc",
       },
-      take: 10,
+      take: 20,
     })
 
     const latestInvoices = invoices.map((invoice) => ({
@@ -70,5 +70,52 @@ export async function fetchInvoiceById(id: string) {
   } catch (error) {
     console.error("Error retrieving invoice by id:", error)
     throw new Error("Error retrieving invoice by id")
+  }
+}
+
+export async function createInvoice(data: InvoiceWithRelations) {
+  //await new Promise((resolve) => setTimeout(resolve, 1000))
+  try {
+    const newInvoice = await prisma.invoice.create({
+      data: {
+        id: data.id,
+        paymentDue: new Date(data.invoiceDate),
+        description: data.description,
+        paymentTerms: data.paymentTerms,
+        clientName: data.clientName,
+        clientEmail: data.clientEmail,
+        status: "pending", // or get the status from the form data if applicable
+        total: 0, // You may need to calculate this based on items
+        senderAddress: {
+          create: {
+            street: data.senderAddress.street,
+            city: data.senderAddress.city,
+            postCode: data.senderAddress.postCode,
+            country: data.senderAddress.country,
+          },
+        },
+        clientAddress: {
+          create: {
+            street: data.clientAddress.street,
+            city: data.clientAddress.city,
+            postCode: data.clientAddress.postCode,
+            country: data.clientAddress.country,
+          },
+        },
+        items: {
+          create: data.items.map((item: any) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.quantity * item.price,
+          })),
+        },
+      },
+    })
+  } catch (error) {
+    console.error("Error creating invoice:", error)
+    return {
+      message: "Database Error: Failed to Create Invoice.",
+    }
   }
 }

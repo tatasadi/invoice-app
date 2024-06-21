@@ -7,11 +7,13 @@ export default function InputWithLabel({
   id,
   label,
   className = "",
+  error = [],
   ...props
 }: {
   id: string
   label: string
   className?: string
+  error?: string[]
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <FormItem className={cn("flex flex-col gap-2", className)}>
@@ -19,7 +21,12 @@ export default function InputWithLabel({
       <FormControl>
         <Input id={id} {...props} />
       </FormControl>
-      <FormMessage />
+
+      {error.length > 0 ? (
+        <FormMessage>{error.join(", ")}</FormMessage>
+      ) : (
+        <FormMessage />
+      )}
     </FormItem>
   )
 }

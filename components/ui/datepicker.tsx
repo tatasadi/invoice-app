@@ -25,7 +25,7 @@ export function DatePicker({ label, ...field }: { label: string } & any) {
             <Button
               variant={"outline"}
               className={cn(
-                "justify-between text-left font-bold text-foreground",
+                "justify-between bg-background text-left font-bold text-foreground dark:bg-navy-dark",
                 !field.value && "text-muted-foreground",
               )}
             >

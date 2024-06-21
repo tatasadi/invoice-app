@@ -16,3 +16,13 @@ export const formatCurrency = (amount: number) => {
 export function formatDate(date: Date): string {
   return format(date, "dd MMM yyyy")
 }
+
+export function generateRandomId(): string {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  const randomLetters =
+    letters.charAt(Math.floor(Math.random() * letters.length)) +
+    letters.charAt(Math.floor(Math.random() * letters.length))
+  const randomDigits = Math.floor(1000 + Math.random() * 9000).toString() // Ensures a 4-digit number
+
+  return randomLetters + randomDigits
+}
