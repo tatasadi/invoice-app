@@ -15,7 +15,11 @@ import {
 import Image from "next/image"
 import { FormControl, FormItem, FormLabel, FormMessage } from "./form"
 
-export function DatePicker({ label, ...field }: { label: string } & any) {
+export function DatePicker({
+  label,
+  error = [],
+  ...field
+}: { label: string; error?: string[] } & any) {
   return (
     <FormItem className="flex flex-col gap-1">
       <FormLabel>{label}</FormLabel>
@@ -51,7 +55,11 @@ export function DatePicker({ label, ...field }: { label: string } & any) {
           />
         </PopoverContent>
       </Popover>
-      <FormMessage />
+      {error.length > 0 ? (
+        <FormMessage>{error.join(", ")}</FormMessage>
+      ) : (
+        <FormMessage />
+      )}
     </FormItem>
   )
 }

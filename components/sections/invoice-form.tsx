@@ -107,6 +107,7 @@ export default function InvoiceForm({
                   id="senderAddress.city"
                   type="text"
                   label="City"
+                  error={formErrors.senderAddress?.city?._errors}
                   {...field}
                 />
               )}
@@ -119,6 +120,7 @@ export default function InvoiceForm({
                   id="senderAddress.postCode"
                   type="text"
                   label="Post Code"
+                  error={formErrors.senderAddress?.postCode?._errors}
                   {...field}
                 />
               )}
@@ -132,6 +134,7 @@ export default function InvoiceForm({
                   id="senderAddress.country"
                   type="text"
                   label="Country"
+                  error={formErrors.senderAddress?.country?._errors}
                   {...field}
                 />
               )}
@@ -149,6 +152,7 @@ export default function InvoiceForm({
                 id="clientName"
                 type="text"
                 label="Client’s Name"
+                error={formErrors.clientName?._errors}
                 {...field}
               />
             )}
@@ -162,6 +166,7 @@ export default function InvoiceForm({
                 id="clientEmail"
                 type="email"
                 label="Client’s Email"
+                error={formErrors.clientEmail?._errors}
                 {...field}
               />
             )}
@@ -175,6 +180,7 @@ export default function InvoiceForm({
                 id="clientAddress.street"
                 type="text"
                 label="Street Address"
+                error={formErrors.clientAddress?.street?._errors}
                 {...field}
               />
             )}
@@ -189,6 +195,7 @@ export default function InvoiceForm({
                   id="clientAddress.city"
                   type="text"
                   label="City"
+                  error={formErrors.clientAddress?.city?._errors}
                   {...field}
                 />
               )}
@@ -201,6 +208,7 @@ export default function InvoiceForm({
                   id="clientAddress.postCode"
                   type="text"
                   label="Post Code"
+                  error={formErrors.clientAddress?.postCode?._errors}
                   {...field}
                 />
               )}
@@ -214,6 +222,7 @@ export default function InvoiceForm({
                   id="clientAddress.country"
                   type="text"
                   label="Country"
+                  error={formErrors.clientAddress?.country?._errors}
                   {...field}
                 />
               )}
@@ -224,7 +233,13 @@ export default function InvoiceForm({
           <FormField
             control={form.control}
             name="invoiceDate"
-            render={({ field }) => <DatePicker label="Issue Date" {...field} />}
+            render={({ field }) => (
+              <DatePicker
+                label="Issue Date"
+                error={formErrors.invoiceDate?._errors}
+                {...field}
+              />
+            )}
           />
           <FormField
             control={form.control}
@@ -241,7 +256,14 @@ export default function InvoiceForm({
                   ]}
                   onSelect={field.onChange}
                 />
-                <FormMessage />
+                {formErrors.paymentTerms?._errors &&
+                formErrors.paymentTerms?._errors.length > 0 ? (
+                  <FormMessage>
+                    {formErrors.paymentTerms?._errors.join(", ")}
+                  </FormMessage>
+                ) : (
+                  <FormMessage />
+                )}
               </FormItem>
             )}
           />
@@ -254,6 +276,7 @@ export default function InvoiceForm({
                 type="text"
                 label="Project Description"
                 className="sm:col-span-2"
+                error={formErrors.description?._errors}
                 {...field}
               />
             )}
