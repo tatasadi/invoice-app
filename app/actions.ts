@@ -2,7 +2,7 @@
 
 import { z } from "zod"
 import { invoiceSchema } from "./schema"
-import { InvoiceWithRelations, createInvoice } from "@/lib/data"
+import { InvoiceWithRelations, createInvoice, deleteInvoice } from "@/lib/data"
 import { v4 as uuid } from "uuid"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
@@ -54,9 +54,16 @@ export async function createInvoiceAction(data: z.infer<typeof invoiceSchema>) {
     items: [],
   }
 
-  console.log("invoiceData", invoiceData)
-
+  //TODO try catch
   await createInvoice(invoiceData)
+
+  revalidatePath("/")
+  redirect("/")
+}
+
+export async function deleteInvoiceAction(id: string) {
+  //TODO try catch
+  await deleteInvoice(id)
 
   revalidatePath("/")
   redirect("/")

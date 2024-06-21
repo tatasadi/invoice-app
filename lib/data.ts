@@ -119,3 +119,38 @@ export async function createInvoice(data: InvoiceWithRelations) {
     }
   }
 }
+
+export async function deleteInvoice(invoiceId: string) {
+  try {
+    // First, delete all related items
+    await prisma.item.deleteMany({
+      where: { invoiceId },
+    })
+
+    // Fetch the related addresses before deleting the invoice
+    const invoice = await prisma.invoice.findUnique({
+      where: { id: invoiceId },
+      include: { senderAddress: true, clientAddress: true },
+    })
+
+    // Delete the invoice first to remove foreign key constraints
+    await prisma.invoice.delete({
+      where: { id: invoiceId },
+    })
+
+    if (invoice) {
+      // Then delete the related addresses
+      await prisma.address.delete({
+        where: { id: invoice.senderAddressId },
+      })
+
+      await prisma.address.delete({
+        where: { id: invoice.clientAddressId },
+      })
+    }
+  } catch (error) {
+    console.error("Error deleting invoice with relations:", error)
+  } finally {
+    await prisma.$disconnect()
+  }
+}
