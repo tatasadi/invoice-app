@@ -7,16 +7,25 @@ export default function InputWithLabel({
   label,
   className = "",
   error = [],
+  hasLabel = true,
   ...props
 }: {
   id: string
   label: string
   className?: string
   error?: string[]
+  hasLabel?: boolean
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <FormItem className={cn("flex flex-col gap-2", className)}>
-      <FormLabel htmlFor={id}>{label}</FormLabel>
+      {hasLabel && (
+        <FormLabel
+          htmlFor={id}
+          className="text-[0.8125rem] leading-[0.9375rem] tracking-[-0.00625rem]"
+        >
+          {label}
+        </FormLabel>
+      )}
       <FormControl>
         <Input id={id} {...props} />
       </FormControl>

@@ -8,27 +8,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-
 import { DatePicker } from "@/components/ui/datepicker"
 import InputWithLabel from "@/components/input-with-label"
 import { DropdownSelect } from "@/components/ui/dropdown-select"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, useFieldArray } from "react-hook-form"
 import { z } from "zod"
 import { createInvoiceAction } from "@/app/actions"
 import { invoiceSchema } from "@/app/schema"
 import { useState, useTransition } from "react"
-import { start } from "repl"
-
-// type FormErrors = {
-//   senderAddress?: string[] | undefined
-//   clientName?: string[] | undefined
-//   clientEmail?: string[] | undefined
-//   clientAddress?: string[] | undefined
-//   invoiceDate?: string[] | undefined
-//   paymentTerms?: string[] | undefined
-//   description?: string[] | undefined
-// }
+import { FaTrash } from "react-icons/fa"
+import { useBreakpoint } from "@/lib/hooks/tailwind"
 
 type FormErrors = z.inferFormattedError<typeof invoiceSchema>
 
@@ -39,8 +29,7 @@ export default function InvoiceForm({
 }) {
   const [pending, startTransition] = useTransition()
   const [formErrors, setFormErrors] = useState<FormErrors>({} as FormErrors)
-
-  console.log("formErrors", formErrors)
+  const isTablet = useBreakpoint("sm")
 
   const form = useForm<z.infer<typeof invoiceSchema>>({
     resolver: zodResolver(invoiceSchema),
@@ -62,18 +51,25 @@ export default function InvoiceForm({
       invoiceDate: undefined,
       paymentTerms: "",
       description: "",
+      items: [{ name: "", quantity: 1, price: 0 }],
     },
   })
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "items",
+  })
+
   async function onSubmit(data: z.infer<typeof invoiceSchema>) {
-    startTransition(async () => {
-      const result = await createInvoiceAction(data)
-      if (result?.errors) {
-        setFormErrors(result.errors)
-      } else {
-        setFormErrors({} as FormErrors)
-      }
-    })
+    console.log("data", data)
+    // startTransition(async () => {
+    //   const result = await createInvoiceAction(data)
+    //   if (result?.errors) {
+    //     setFormErrors(result.errors)
+    //   } else {
+    //     setFormErrors({} as FormErrors)
+    //   }
+    // })
   }
 
   return (
@@ -282,22 +278,85 @@ export default function InvoiceForm({
             )}
           />
         </section>
-
-        {/* {formErrors && (
-          <div className="mt-6 text-red-500">
-            {Object.values(formErrors).map((error, index) => (
-              <p key={index}>{error}</p>
+        <section className="mt-12 sm:mt-9">
+          <h2 className="font-bold text-navy-muted-dark dark:text-white">
+            Item List
+          </h2>
+          <div className="flex flex-col gap-y-12 sm:gap-y-5">
+            {fields.map((item, index) => (
+              <div
+                key={item.id}
+                className="mt-5 grid grid-cols-[auto_1fr_1fr_auto] gap-6 sm:mt-3 sm:grid-cols-[auto_1fr_1fr_1fr_1fr]"
+              >
+                <FormField
+                  control={form.control}
+                  name={`items.${index}.name`}
+                  render={({ field }) => (
+                    <InputWithLabel
+                      className="col-span-4 w-full sm:col-span-1 sm:w-auto"
+                      id={`items.${index}.name`}
+                      type="text"
+                      label="Item Name"
+                      hasLabel={!isTablet || index === 0}
+                      error={formErrors.items?.[index]?.name?._errors}
+                      {...field}
+                    />
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`items.${index}.quantity`}
+                  render={({ field }) => (
+                    <InputWithLabel
+                      id={`items.${index}.quantity`}
+                      type="number"
+                      label="Qty."
+                      error={formErrors.items?.[index]?.quantity?._errors}
+                      hasLabel={!isTablet || index === 0}
+                      {...field}
+                    />
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`items.${index}.price`}
+                  render={({ field }) => (
+                    <InputWithLabel
+                      id={`items.${index}.price`}
+                      type="number"
+                      className="w-[6.25rem]"
+                      label="Price"
+                      error={formErrors.items?.[index]?.price?._errors}
+                      hasLabel={!isTablet || index === 0}
+                      {...field}
+                    />
+                  )}
+                />
+                <div className="flex flex-col gap-2 self-start justify-self-center text-secondary">
+                  {(!isTablet || index === 0) && <p>Total</p>}
+                  <p className="mt-5" id={`items.${index}.total`}>
+                    {(Number(item.quantity) * Number(item.price)).toFixed(2)}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className={!isTablet || index === 0 ? "mt-6" : "mt-1"}
+                  onClick={() => remove(index)}
+                >
+                  <FaTrash className="text-secondary" />
+                </Button>
+              </div>
             ))}
           </div>
-        )} */}
-        {/* {formErrors && (
-          <p className="mt-6">
-            {Object.values(formErrors).map((error, index) => (
-              <p key={index}>{error}</p>
-            ))}
-          </p>
-        )} */}
-
+          <Button
+            type="button"
+            className="mt-12 w-full sm:mt-5"
+            onClick={() => append({ name: "", quantity: 1, price: 0 })}
+          >
+            + Add New Item
+          </Button>
+        </section>
         <Button
           className="mt-10"
           variant="primary"
