@@ -60,6 +60,8 @@ export default function InvoiceForm({
     name: "items",
   })
 
+  const items = form.watch("items")
+
   async function onSubmit(data: z.infer<typeof invoiceSchema>) {
     console.log("data", data)
     // startTransition(async () => {
@@ -335,7 +337,9 @@ export default function InvoiceForm({
                 <div className="flex flex-col gap-2 self-start justify-self-center text-secondary">
                   {(!isTablet || index === 0) && <p>Total</p>}
                   <p className="mt-5" id={`items.${index}.total`}>
-                    {(Number(item.quantity) * Number(item.price)).toFixed(2)}
+                    {(
+                      Number(items[index].quantity) * Number(items[index].price)
+                    ).toFixed(2)}
                   </p>
                 </div>
                 <Button
