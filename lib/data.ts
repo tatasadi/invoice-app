@@ -84,8 +84,8 @@ export async function createInvoice(data: InvoiceWithRelations) {
         paymentTerms: data.paymentTerms,
         clientName: data.clientName,
         clientEmail: data.clientEmail,
-        status: "pending", // or get the status from the form data if applicable
-        total: 0, // You may need to calculate this based on items
+        status: "pending",
+        total: data.total,
         senderAddress: {
           create: {
             street: data.senderAddress.street,

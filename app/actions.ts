@@ -20,19 +20,19 @@ export async function createInvoiceAction(data: z.infer<typeof invoiceSchema>) {
 
   const senderAddressId = uuid()
   const clientAddressId = uuid()
+  const invoiceId = generateRandomId()
 
   const invoiceData: InvoiceWithRelations = {
     ...validatedFields.data,
-    id: generateRandomId(),
+    id: invoiceId,
     paymentDue: new Date(validatedFields.data.invoiceDate),
     invoiceDate: new Date(validatedFields.data.invoiceDate),
     paymentTerms: parseInt(validatedFields.data.paymentTerms),
     status: "pending",
-    // total: validatedFields.data.items?.reduce(
-    //   (sum, item) => sum + item.total,
-    //   0,
-    // ), // Calculate total
-    total: 0,
+    total: validatedFields.data.items?.reduce(
+      (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
+      0,
+    ),
     createdAt: new Date(),
     updatedAt: new Date(),
     senderAddress: {
@@ -45,13 +45,14 @@ export async function createInvoiceAction(data: z.infer<typeof invoiceSchema>) {
     },
     senderAddressId: senderAddressId,
     clientAddressId: clientAddressId,
-    // items: validatedFields.data.items.map((item) => ({
-    //   name: item.name,
-    //   quantity: item.quantity,
-    //   price: item.price,
-    //   total: item.total,
-    // })),
-    items: [],
+    items: validatedFields.data.items.map((item) => ({
+      id: uuid(),
+      invoiceId: invoiceId,
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+      total: item.price * item.quantity,
+    })),
   }
 
   //TODO try catch

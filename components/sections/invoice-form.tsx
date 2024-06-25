@@ -63,15 +63,15 @@ export default function InvoiceForm({
   const items = form.watch("items")
 
   async function onSubmit(data: z.infer<typeof invoiceSchema>) {
-    console.log("data", data)
-    // startTransition(async () => {
-    //   const result = await createInvoiceAction(data)
-    //   if (result?.errors) {
-    //     setFormErrors(result.errors)
-    //   } else {
-    //     setFormErrors({} as FormErrors)
-    //   }
-    // })
+    // console.log("data", data)
+    startTransition(async () => {
+      const result = await createInvoiceAction(data)
+      if (result?.errors) {
+        setFormErrors(result.errors)
+      } else {
+        setFormErrors({} as FormErrors)
+      }
+    })
   }
 
   return (
