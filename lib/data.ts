@@ -84,7 +84,7 @@ export async function createInvoice(data: InvoiceWithRelations) {
         paymentTerms: data.paymentTerms,
         clientName: data.clientName,
         clientEmail: data.clientEmail,
-        status: "pending",
+        status: data.status,
         total: data.total,
         senderAddress: {
           create: {

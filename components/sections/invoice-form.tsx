@@ -14,11 +14,12 @@ import { DropdownSelect } from "@/components/ui/dropdown-select"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useFieldArray } from "react-hook-form"
 import { z } from "zod"
-import { createInvoiceAction } from "@/app/actions"
+import { createDraftInvoiceAction, createInvoiceAction } from "@/app/actions"
 import { invoiceSchema } from "@/app/schema"
 import { useState, useTransition } from "react"
 import { FaTrash } from "react-icons/fa"
 import { useBreakpoint } from "@/lib/hooks/tailwind"
+import { useRouter } from "next/navigation"
 
 type FormErrors = z.inferFormattedError<typeof invoiceSchema>
 
@@ -27,6 +28,7 @@ export default function InvoiceForm({
 }: {
   className?: string
 }) {
+  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [formErrors, setFormErrors] = useState<FormErrors>({} as FormErrors)
   const isTablet = useBreakpoint("sm")
@@ -61,6 +63,19 @@ export default function InvoiceForm({
   })
 
   const items = form.watch("items")
+
+  function handleDiscard() {
+    router.back()
+    form.reset()
+  }
+
+  async function handleSaveAsDraft() {
+    startTransition(async () => {
+      await createDraftInvoiceAction({
+        ...form.getValues(),
+      })
+    })
+  }
 
   async function onSubmit(data: z.infer<typeof invoiceSchema>) {
     // console.log("data", data)
@@ -370,6 +385,7 @@ export default function InvoiceForm({
             <Button
               type="button"
               className="dark:bg-light-bg dark:text-blue-muted"
+              onClick={handleDiscard}
             >
               Discard
             </Button>
@@ -378,15 +394,11 @@ export default function InvoiceForm({
               variant="dark"
               className="sm:ml-auto"
               disabled={pending}
+              onClick={handleSaveAsDraft}
             >
               Save as Draft
             </Button>
-            <Button
-              className=""
-              variant="primary"
-              type="submit"
-              disabled={pending}
-            >
+            <Button variant="primary" type="submit" disabled={pending}>
               Sava & Send
             </Button>
           </section>

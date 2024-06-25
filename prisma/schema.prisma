@@ -8,40 +8,40 @@ datasource db {
 }
 
 model Invoice {
-  id              String   @id @default(cuid())
-  paymentDue      DateTime
-  description     String
-  paymentTerms    Int
-  clientName      String
-  clientEmail     String
+  id              String    @id @default(cuid())
+  paymentDue      DateTime?
+  description     String?
+  paymentTerms    Int?
+  clientName      String?
+  clientEmail     String?
   status          String
-  senderAddress   Address  @relation("senderAddress", fields: [senderAddressId], references: [id])
+  senderAddress   Address   @relation("senderAddress", fields: [senderAddressId], references: [id])
   senderAddressId String
-  clientAddress   Address  @relation("clientAddress", fields: [clientAddressId], references: [id])
+  clientAddress   Address   @relation("clientAddress", fields: [clientAddressId], references: [id])
   clientAddressId String
   items           Item[]
   total           Float
-  invoiceDate     DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  invoiceDate     DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model Address {
   id           String    @id @default(cuid())
-  street       String
-  city         String
-  postCode     String
-  country      String
+  street       String?
+  city         String?
+  postCode     String?
+  country      String?
   senderAdress Invoice[] @relation("senderAddress")
   clientAdress Invoice[] @relation("clientAddress")
 }
 
 model Item {
   id        String  @id @default(cuid())
-  name      String
-  quantity  Int
-  price     Float
-  total     Float
+  name      String?
+  quantity  Int?
+  price     Float?
+  total     Float?
   invoiceId String
   invoice   Invoice @relation(fields: [invoiceId], references: [id])
 }
