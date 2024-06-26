@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton"
+import { ITEMS_PER_PAGE } from "@/lib/data"
 
 export function InvoiceListItemSkeleton() {
   return (
@@ -15,7 +16,7 @@ export function InvoiceListItemSkeleton() {
 export function InvoiceTableSkeleton() {
   return (
     <div className="grid gap-4">
-      {Array.from({ length: 10 }).map((_, index) => (
+      {Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
         <InvoiceListItemSkeleton key={index} />
       ))}
     </div>

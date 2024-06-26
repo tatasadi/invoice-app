@@ -11,6 +11,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@heroicons/react": "^2.1.4",
     "@hookform/resolvers": "^3.6.0",
     "@kodingdotninja/use-tailwind-breakpoint": "^1.0.0",
     "@prisma/client": "^5.14.0",

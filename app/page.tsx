@@ -10,13 +10,18 @@ import iconPlus from "@/public/img/icon-plus.svg"
 import TotalInvoices from "@/components/total-invoices"
 import FilterDropdown from "@/components/filter-dropdown"
 import Link from "next/link"
+import Pagination from "@/components/pagination"
+import { fetchInvoicesPages } from "@/lib/data"
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: { status?: string }
+  searchParams?: { status?: string; page?: string }
 }) {
   const status = searchParams?.status?.split(",") || []
+  const currentPage = Number(searchParams?.page) || 1
+
+  const totalPages = await fetchInvoicesPages(status)
 
   return (
     <>
@@ -40,9 +45,12 @@ export default async function Page({
         </Button>
       </div>
 
-      <Suspense fallback={<InvoiceTableSkeleton />}>
-        <InvoicesTable status={status} />
+      <Suspense key={currentPage} fallback={<InvoiceTableSkeleton />}>
+        <InvoicesTable status={status} currentPage={currentPage} />
       </Suspense>
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={totalPages} />
+      </div>
     </>
   )
 }

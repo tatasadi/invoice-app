@@ -2,6 +2,8 @@ import { Address, Invoice, Item } from "@prisma/client"
 import prisma from "./db"
 import { unstable_noStore as noStore } from "next/cache"
 
+export const ITEMS_PER_PAGE = 7
+
 export type InvoiceWithRelations = Invoice & {
   senderAddress: Address
   clientAddress: Address
@@ -9,6 +11,7 @@ export type InvoiceWithRelations = Invoice & {
 }
 
 export async function fetchLatestInvoices(
+  currentPage: number,
   status?: string[],
 ): Promise<Invoice[]> {
   noStore()
@@ -24,7 +27,8 @@ export async function fetchLatestInvoices(
       orderBy: {
         createdAt: "asc",
       },
-      take: 20,
+      skip: (currentPage - 1) * ITEMS_PER_PAGE,
+      take: ITEMS_PER_PAGE,
     })
 
     const latestInvoices = invoices.map((invoice) => ({
@@ -45,6 +49,25 @@ export async function fetchInvoicesCount(): Promise<number> {
   try {
     const count = await prisma.invoice.count()
     return count
+  } catch (error) {
+    console.error("Error retrieving invoice count:", error)
+    throw new Error("Error retrieving invoice count")
+  }
+}
+
+export async function fetchInvoicesPages(status: string[]): Promise<number> {
+  noStore()
+  //await new Promise((resolve) => setTimeout(resolve, 1000))
+
+  try {
+    const count = await prisma.invoice.count({
+      where: {
+        status: {
+          in: status && status.length > 0 ? status : undefined,
+        },
+      },
+    })
+    return Math.ceil(Number(count) / ITEMS_PER_PAGE)
   } catch (error) {
     console.error("Error retrieving invoice count:", error)
     throw new Error("Error retrieving invoice count")
