@@ -75,7 +75,9 @@ export async function fetchInvoicesPages(status: string[]): Promise<number> {
 }
 
 // get invoce by id with sender address and client address and items
-export async function fetchInvoiceById(id: string) {
+export async function fetchInvoiceById(
+  id: string,
+): Promise<InvoiceWithRelations | null> {
   noStore()
   //await new Promise((resolve) => setTimeout(resolve, 1000))
 
@@ -89,7 +91,7 @@ export async function fetchInvoiceById(id: string) {
       },
     })
 
-    return invoice
+    return invoice || null
   } catch (error) {
     console.error("Error retrieving invoice by id:", error)
     throw new Error("Error retrieving invoice by id")

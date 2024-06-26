@@ -5,6 +5,7 @@ import StatusBadge from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import { InvoiceWithRelations } from "@/lib/data"
 import { formatDate, formatCurrency } from "@/lib/utils"
+import Link from "next/link"
 
 export default function ViewInvoice({
   invoice,
@@ -38,7 +39,9 @@ export default function ViewInvoice({
           <StatusBadge status={status} />
         </div>
         <div className="absolute bottom-0 left-0 right-0 flex w-full justify-center gap-2 bg-card p-5 sm:relative sm:w-fit sm:bg-none sm:p-0">
-          <Button>Edit</Button>
+          <Button asChild>
+            <Link href={`/edit/${id}`}>Edit</Link>
+          </Button>
           <Button variant="destructive" onClick={handleDelete}>
             Delete
           </Button>

@@ -20,14 +20,18 @@ import { useState, useTransition } from "react"
 import { FaTrash } from "react-icons/fa"
 import { useBreakpoint } from "@/lib/hooks/tailwind"
 import { useRouter } from "next/navigation"
+import { InvoiceWithRelations } from "@/lib/data"
 
 type FormErrors = z.inferFormattedError<typeof invoiceSchema>
 
 export default function InvoiceForm({
   className = "",
+  invoice = null,
 }: {
   className?: string
+  invoice?: InvoiceWithRelations | null
 }) {
+  console.log("invoice", invoice)
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [formErrors, setFormErrors] = useState<FormErrors>({} as FormErrors)
@@ -37,23 +41,33 @@ export default function InvoiceForm({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
       senderAddress: {
-        street: "",
-        city: "",
-        postCode: "",
-        country: "",
+        street: invoice?.senderAddress.street || "",
+        city: invoice?.senderAddress.city || "",
+        postCode: invoice?.senderAddress.postCode || "",
+        country: invoice?.senderAddress.country || "",
       },
-      clientName: "",
-      clientEmail: "",
+      clientName: invoice?.clientName || "",
+      clientEmail: invoice?.clientEmail || "",
       clientAddress: {
-        street: "",
-        city: "",
-        postCode: "",
-        country: "",
+        street: invoice?.clientAddress.street || "",
+        city: invoice?.clientAddress.city || "",
+        postCode: invoice?.clientAddress.postCode || "",
+        country: invoice?.clientAddress.country || "",
       },
-      invoiceDate: undefined,
-      paymentTerms: "",
-      description: "",
-      items: [{ name: "", quantity: 1, price: 0 }],
+      invoiceDate: invoice?.invoiceDate || undefined,
+      paymentTerms: invoice?.paymentTerms?.toString() || "",
+      description: invoice?.description || "",
+      items: invoice?.items.map((item) => ({
+        name: item.name || "",
+        quantity: item.quantity || 1,
+        price: item.price || 0,
+      })) || [
+        {
+          name: "",
+          quantity: 1,
+          price: 0,
+        },
+      ],
     },
   })
 
@@ -273,6 +287,7 @@ export default function InvoiceForm({
                       { value: "30", label: "Net 30 Days" },
                     ]}
                     onSelect={field.onChange}
+                    initialSelected={invoice?.paymentTerms?.toString() || ""}
                   />
                   {formErrors.paymentTerms?._errors &&
                   formErrors.paymentTerms?._errors.length > 0 ? (

@@ -14,15 +14,17 @@ interface Option {
 interface DropdownSelectProps {
   options: Option[]
   onSelect: (value: string) => void
+  initialSelected?: string
   className?: string
 }
 
 export function DropdownSelect({
   options,
   onSelect,
-  className,
+  initialSelected = "",
+  className = "",
 }: DropdownSelectProps) {
-  const [selected, setSelected] = useState<string>("")
+  const [selected, setSelected] = useState<string>(initialSelected)
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
