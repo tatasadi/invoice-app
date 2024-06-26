@@ -3,7 +3,6 @@
 import * as React from "react"
 import { format } from "date-fns"
 import iconCalendar from "@/public/img/icon-calendar.svg"
-
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -15,11 +14,10 @@ import {
 import Image from "next/image"
 import { FormControl, FormItem, FormLabel, FormMessage } from "./form"
 
-export function DatePicker({
-  label,
-  error = [],
-  ...field
-}: { label: string; error?: string[] } & any) {
+const DatePicker = React.forwardRef<
+  HTMLInputElement,
+  { label: string; error?: string[] } & any
+>(({ label, error = [], ...field }, ref) => {
   return (
     <FormItem className="flex flex-col gap-1">
       <FormLabel>{label}</FormLabel>
@@ -62,4 +60,8 @@ export function DatePicker({
       )}
     </FormItem>
   )
-}
+})
+
+DatePicker.displayName = "DatePicker"
+
+export { DatePicker }

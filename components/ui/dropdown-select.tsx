@@ -92,7 +92,7 @@ export function DropdownSelect({
       <div className="flex items-center">
         <button
           ref={buttonRef}
-          className="block w-full appearance-none rounded border border-blue-light bg-background px-5 py-4 pr-10 text-left text-foreground focus:border-purple-primary focus:outline-none focus:ring-indigo-500 dark:bg-navy-dark"
+          className="block w-full appearance-none rounded border border-blue-light bg-background px-5 py-4 pr-10 text-left text-foreground focus:border-purple-primary focus:outline-none focus:ring-indigo-500 dark:border-navy-medium dark:bg-navy-dark"
           onClick={() => setIsOpen(!isOpen)}
           onKeyDown={handleKeyDown}
           aria-haspopup="listbox"

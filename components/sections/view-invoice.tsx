@@ -66,7 +66,9 @@ export default function ViewInvoice({
             <h3 className="text-secondary">Invoice Date</h3>
             <p className="mt-3 font-bold">{formatDate(createdAt)}</p>
             <h3 className="mt-8 text-secondary">Payment Due</h3>
-            <p className="mt-3 font-bold">{formatDate(paymentDue)}</p>
+            <p className="mt-3 font-bold">
+              {paymentDue ? formatDate(paymentDue) : ""}
+            </p>
           </div>
           <div>
             <h3 className="text-secondary">Bill To</h3>
@@ -106,10 +108,10 @@ export default function ViewInvoice({
                 </p>
                 <p className="row-start-2 mt-2 justify-self-start text-secondary sm:row-start-auto sm:mt-0 sm:justify-self-auto">
                   <span className="sm:hidden">{item.quantity} x </span>
-                  {formatCurrency(item.price)}
+                  {item.price ? formatCurrency(item.price) : ""}
                 </p>
                 <p className="row-span-2 self-center sm:row-span-1 sm:self-auto">
-                  {formatCurrency(item.total)}
+                  {item.total ? formatCurrency(item.total) : ""}
                 </p>
               </div>
             ))}

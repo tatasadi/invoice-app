@@ -74,6 +74,8 @@ export default function InvoiceForm({
       await createDraftInvoiceAction({
         ...form.getValues(),
       })
+      router.back()
+      form.reset()
     })
   }
 
@@ -85,6 +87,8 @@ export default function InvoiceForm({
         setFormErrors(result.errors)
       } else {
         setFormErrors({} as FormErrors)
+        router.back()
+        form.reset()
       }
     })
   }
@@ -92,7 +96,7 @@ export default function InvoiceForm({
   return (
     <Form {...form}>
       <form
-        className={cn("pb-[10rem]", className)}
+        className={cn("pb-[12rem]", className)}
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <div className="px-6">
@@ -380,8 +384,8 @@ export default function InvoiceForm({
           </section>
         </div>
         <div className="fixed inset-0 top-auto w-full sm:right-auto sm:max-w-[38.5rem] lg:max-w-[45rem] lg:pl-[6.4rem]">
-          <div className="mt-6 h-16 w-full bg-[linear-gradient(180deg,rgba(0,0,0,0.00)_0%,_rgba(0,0,0,0.10)_100%)]"></div>
-          <section className="flex items-center justify-between gap-2 bg-white p-6 shadow-[0px_10px-10px_-10px_rgba(72,84,159,0.10)] sm:rounded-r-[1.25rem] sm:px-14 sm:py-8 sm:shadow-none">
+          <div className="h-16 w-full bg-[linear-gradient(180deg,rgba(0,0,0,0.00)_0%,_rgba(0,0,0,0.10)_100%)]"></div>
+          <section className="flex items-center justify-between gap-2 bg-background p-6 shadow-[0px_10px-10px_-10px_rgba(72,84,159,0.10)] sm:rounded-r-[1.25rem] sm:px-14 sm:py-8 sm:shadow-none">
             <Button
               type="button"
               className="dark:bg-light-bg dark:text-blue-muted"

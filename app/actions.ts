@@ -71,7 +71,6 @@ export async function createInvoiceAction(data: z.infer<typeof invoiceSchema>) {
   await createInvoice(invoiceData)
 
   revalidatePath("/")
-  redirect("/")
 }
 
 export async function createDraftInvoiceAction(
@@ -85,7 +84,6 @@ export async function createDraftInvoiceAction(
   await createInvoice(invoiceData)
 
   revalidatePath("/")
-  redirect("/")
 }
 
 export async function deleteInvoiceAction(id: string) {
