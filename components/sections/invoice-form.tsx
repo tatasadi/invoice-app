@@ -14,7 +14,11 @@ import { DropdownSelect } from "@/components/ui/dropdown-select"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useFieldArray } from "react-hook-form"
 import { z } from "zod"
-import { createDraftInvoiceAction, createInvoiceAction } from "@/app/actions"
+import {
+  createDraftInvoiceAction,
+  createInvoiceAction,
+  updateInvoiceAction,
+} from "@/app/actions"
 import { invoiceSchema } from "@/app/schema"
 import { useState, useTransition } from "react"
 import { FaTrash } from "react-icons/fa"
@@ -94,9 +98,10 @@ export default function InvoiceForm({
   }
 
   async function onSubmit(data: z.infer<typeof invoiceSchema>) {
-    // console.log("data", data)
     startTransition(async () => {
-      const result = await createInvoiceAction(data)
+      const result = invoice
+        ? await updateInvoiceAction(invoice, data)
+        : await createInvoiceAction(data)
       if (result?.errors) {
         setFormErrors(result.errors)
       } else {
@@ -400,26 +405,43 @@ export default function InvoiceForm({
         </div>
         <div className="fixed inset-0 top-auto w-full sm:right-auto sm:max-w-[38.5rem] lg:max-w-[45rem] lg:pl-[6.4rem]">
           <div className="h-16 w-full bg-[linear-gradient(180deg,rgba(0,0,0,0.00)_0%,_rgba(0,0,0,0.10)_100%)]"></div>
-          <section className="flex items-center justify-between gap-2 bg-background p-6 shadow-[0px_10px-10px_-10px_rgba(72,84,159,0.10)] sm:rounded-r-[1.25rem] sm:px-14 sm:py-8 sm:shadow-none">
-            <Button
-              type="button"
-              className="dark:bg-light-bg dark:text-blue-muted"
-              onClick={handleDiscard}
-            >
-              Discard
-            </Button>
-            <Button
-              type="button"
-              variant="dark"
-              className="sm:ml-auto"
-              disabled={pending}
-              onClick={handleSaveAsDraft}
-            >
-              Save as Draft
-            </Button>
-            <Button variant="primary" type="submit" disabled={pending}>
-              Sava & Send
-            </Button>
+          <section className="bg-background p-6 shadow-[0px_10px-10px_-10px_rgba(72,84,159,0.10)] sm:rounded-r-[1.25rem] sm:px-14 sm:py-8 sm:shadow-none">
+            {invoice ? (
+              <div className="flex w-full items-center gap-2">
+                <Button
+                  type="button"
+                  className="ml-auto dark:bg-light-bg dark:text-blue-muted"
+                  onClick={handleDiscard}
+                >
+                  Cancel
+                </Button>
+                <Button variant="primary" type="submit" disabled={pending}>
+                  Sava Changes
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-2">
+                <Button
+                  type="button"
+                  className="dark:bg-light-bg dark:text-blue-muted"
+                  onClick={handleDiscard}
+                >
+                  Discard
+                </Button>
+                <Button
+                  type="button"
+                  variant="dark"
+                  className="sm:ml-auto"
+                  disabled={pending}
+                  onClick={handleSaveAsDraft}
+                >
+                  Save as Draft
+                </Button>
+                <Button variant="primary" type="submit" disabled={pending}>
+                  Sava & Send
+                </Button>
+              </div>
+            )}
           </section>
         </div>
       </form>

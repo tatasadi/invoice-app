@@ -2,7 +2,12 @@
 
 import { z } from "zod"
 import { invoiceSchema } from "./schema"
-import { InvoiceWithRelations, createInvoice, deleteInvoice } from "@/lib/data"
+import {
+  InvoiceWithRelations,
+  createInvoice,
+  deleteInvoice,
+  updateInvoice,
+} from "@/lib/data"
 import { v4 as uuid } from "uuid"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
@@ -10,10 +15,11 @@ import { generateRandomId } from "@/lib/utils"
 
 function createInvoiceWithRelationFromSchema(
   invoiceData: z.infer<typeof invoiceSchema>,
+  oldInvoice?: InvoiceWithRelations,
 ): InvoiceWithRelations {
-  const senderAddressId = uuid()
-  const clientAddressId = uuid()
-  const invoiceId = generateRandomId()
+  const senderAddressId = oldInvoice ? oldInvoice.senderAddress.id : uuid()
+  const clientAddressId = oldInvoice ? oldInvoice.clientAddress.id : uuid()
+  const invoiceId = oldInvoice ? oldInvoice.id : generateRandomId()
 
   return {
     ...invoiceData,
@@ -27,12 +33,12 @@ function createInvoiceWithRelationFromSchema(
     paymentTerms: invoiceData.paymentTerms
       ? parseInt(invoiceData.paymentTerms)
       : 0,
-    status: "pending",
+    status: oldInvoice ? oldInvoice.status : "pending",
     total: invoiceData.items?.reduce(
       (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
       0,
     ),
-    createdAt: new Date(),
+    createdAt: oldInvoice ? oldInvoice.createdAt : new Date(),
     updatedAt: new Date(),
     senderAddress: {
       ...invoiceData.senderAddress,
@@ -92,4 +98,25 @@ export async function deleteInvoiceAction(id: string) {
 
   revalidatePath("/")
   redirect("/")
+}
+
+export async function updateInvoiceAction(
+  invoice: InvoiceWithRelations,
+  data: z.infer<typeof invoiceSchema>,
+) {
+  const validatedFields = invoiceSchema.safeParse(data)
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.format(),
+      message: "Missing Fields. Failed to Update Invoice.",
+    }
+  }
+  console.log("data before update", data)
+  const invoiceData = createInvoiceWithRelationFromSchema(data, invoice)
+
+  //TODO try catch
+  await updateInvoice(invoiceData)
+
+  revalidatePath("/")
 }

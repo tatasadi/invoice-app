@@ -2,7 +2,7 @@ import { Address, Invoice, Item } from "@prisma/client"
 import prisma from "./db"
 import { unstable_noStore as noStore } from "next/cache"
 
-export const ITEMS_PER_PAGE = 7
+export const ITEMS_PER_PAGE = 10
 
 export type InvoiceWithRelations = Invoice & {
   senderAddress: Address
@@ -177,5 +177,64 @@ export async function deleteInvoice(invoiceId: string) {
     console.error("Error deleting invoice with relations:", error)
   } finally {
     await prisma.$disconnect()
+  }
+}
+
+export async function updateInvoice(data: InvoiceWithRelations) {
+  console.log("data", data)
+  try {
+    // Update invoice with all its relations
+    await prisma.invoice.update({
+      where: { id: data.id },
+      data: {
+        paymentDue: new Date(data.invoiceDate),
+        description: data.description,
+        paymentTerms: data.paymentTerms,
+        clientName: data.clientName,
+        clientEmail: data.clientEmail,
+        status: data.status,
+        total: data.total,
+        senderAddress: {
+          update: {
+            where: { id: data.senderAddress.id },
+            data: {
+              street: data.senderAddress.street,
+              city: data.senderAddress.city,
+              postCode: data.senderAddress.postCode,
+              country: data.senderAddress.country,
+            },
+          },
+        },
+        clientAddress: {
+          update: {
+            where: { id: data.clientAddress.id },
+            data: {
+              street: data.clientAddress.street,
+              city: data.clientAddress.city,
+              postCode: data.clientAddress.postCode,
+              country: data.clientAddress.country,
+            },
+          },
+        },
+        items: {
+          deleteMany: {}, // Delete existing items
+          create: data.items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            total: (item.quantity || 0) * (item.price || 0),
+          })),
+        },
+      },
+    })
+    return {
+      message: "Invoice updated successfully",
+    }
+  } catch (error) {
+    console.error("Error updating invoice with relations:", error)
+    return {
+      message: "Database Error: Failed to Update Invoice.",
+    }
   }
 }
