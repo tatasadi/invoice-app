@@ -18,11 +18,13 @@ const InvoiceListItem = ({ invoice }: { invoice: Invoice }) => {
       </h3>
       <p className="mb-2 text-[0.8125rem] font-medium tracking-[-0.00625rem] text-blue-gray dark:text-blue-light sm:mb-0 sm:justify-self-start">
         Due{" "}
-        {new Date(invoice.paymentDue).toLocaleDateString("en-GB", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}
+        {invoice.paymentDue
+          ? new Date(invoice.paymentDue).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          : ""}
       </p>
       <p className="col-start-2 row-span-2 row-start-1 mb-6 place-self-end text-[0.8125rem] font-medium tracking-[-0.00625rem] text-blue-gray dark:text-white sm:col-start-3 sm:row-span-1 sm:mb-0 sm:self-center sm:justify-self-start">
         {invoice.clientName}
