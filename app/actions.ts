@@ -84,7 +84,6 @@ export async function createDraftInvoiceAction(
 ) {
   const invoiceData = createInvoiceWithRelationFromSchema(data)
   invoiceData.status = "draft"
-  console.log(invoiceData)
 
   await createInvoice(invoiceData)
 
@@ -110,7 +109,6 @@ export async function updateInvoiceAction(
       message: "Missing Fields. Failed to Update Invoice.",
     }
   }
-  console.log("data before update", data)
   const invoiceData = createInvoiceWithRelationFromSchema(data, invoice)
 
   await updateInvoice(invoiceData)

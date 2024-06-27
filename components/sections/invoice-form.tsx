@@ -35,7 +35,6 @@ export default function InvoiceForm({
   className?: string
   invoice?: InvoiceWithRelations | null
 }) {
-  console.log("invoice", invoice)
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [formErrors, setFormErrors] = useState<FormErrors>({} as FormErrors)
@@ -389,7 +388,7 @@ export default function InvoiceForm({
                     className={!isTablet || index === 0 ? "mt-6" : "mt-1"}
                     onClick={() => remove(index)}
                   >
-                    <FaTrash className="text-secondary" />
+                    <FaTrash className="text-secondary hover:text-red-primary" />
                   </Button>
                 </div>
               ))}

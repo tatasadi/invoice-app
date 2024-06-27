@@ -181,7 +181,6 @@ export async function deleteInvoice(invoiceId: string) {
 }
 
 export async function updateInvoice(data: InvoiceWithRelations) {
-  console.log("data", data)
   try {
     // Update invoice with all its relations
     await prisma.invoice.update({
