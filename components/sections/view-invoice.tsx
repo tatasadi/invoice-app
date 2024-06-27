@@ -1,5 +1,5 @@
 "use client"
-import { deleteInvoiceAction } from "@/app/actions"
+import { deleteInvoiceAction, markInvoiceAsPaidAction } from "@/app/actions"
 import GoBack from "@/components/go-back"
 import StatusBadge from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
@@ -30,6 +30,10 @@ export default function ViewInvoice({
     await deleteInvoiceAction(id)
   }
 
+  async function handleMarkAsPaid() {
+    await markInvoiceAsPaidAction(id)
+  }
+
   return (
     <>
       <GoBack href="/" />
@@ -45,7 +49,11 @@ export default function ViewInvoice({
           <Button variant="destructive" onClick={handleDelete}>
             Delete
           </Button>
-          <Button variant="primary">Mark as Paid</Button>
+          {status === "pending" && (
+            <Button variant="primary" onClick={handleMarkAsPaid}>
+              Mark as Paid
+            </Button>
+          )}
         </div>
       </div>
       <div className="mb-28 mt-4 rounded-lg bg-card p-6 shadow-lg sm:p-12">

@@ -7,6 +7,7 @@ import {
   createInvoice,
   deleteInvoice,
   updateInvoice,
+  updateInvoiceStatus,
 } from "@/lib/data"
 import { v4 as uuid } from "uuid"
 import { revalidatePath } from "next/cache"
@@ -73,7 +74,6 @@ export async function createInvoiceAction(data: z.infer<typeof invoiceSchema>) {
 
   const invoiceData = createInvoiceWithRelationFromSchema(validatedFields.data)
 
-  //TODO try catch
   await createInvoice(invoiceData)
 
   revalidatePath("/")
@@ -86,14 +86,12 @@ export async function createDraftInvoiceAction(
   invoiceData.status = "draft"
   console.log(invoiceData)
 
-  //TODO try catch
   await createInvoice(invoiceData)
 
   revalidatePath("/")
 }
 
 export async function deleteInvoiceAction(id: string) {
-  //TODO try catch
   await deleteInvoice(id)
 
   revalidatePath("/")
@@ -115,8 +113,13 @@ export async function updateInvoiceAction(
   console.log("data before update", data)
   const invoiceData = createInvoiceWithRelationFromSchema(data, invoice)
 
-  //TODO try catch
   await updateInvoice(invoiceData)
+
+  revalidatePath("/")
+}
+
+export async function markInvoiceAsPaidAction(id: string) {
+  await updateInvoiceStatus(id, "paid")
 
   revalidatePath("/")
 }

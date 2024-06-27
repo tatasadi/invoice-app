@@ -238,3 +238,19 @@ export async function updateInvoice(data: InvoiceWithRelations) {
     }
   }
 }
+
+export async function updateInvoiceStatus(
+  id: string,
+  status: string,
+): Promise<{ message: string }> {
+  try {
+    await prisma.invoice.update({
+      where: { id },
+      data: { status },
+    })
+    return { message: "Invoice status updated successfully" }
+  } catch (error) {
+    console.error("Error updating invoice status:", error)
+    return { message: "Database Error: Failed to Update Invoice Status." }
+  }
+}
