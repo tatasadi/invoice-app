@@ -1,5 +1,5 @@
+import GoBack from "@/components/go-back"
 import { Meta } from "@storybook/react"
-import GoBack from "./go-back"
 
 const meta: Meta<typeof GoBack> = {
   component: GoBack,

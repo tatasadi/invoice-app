@@ -1,12 +1,11 @@
-import { DropdownSelect } from "./dropdown-select"
-import { Meta, StoryObj } from "@storybook/react"
+import { DropdownSelect } from "@/components/ui/dropdown-select"
+import { Meta } from "@storybook/react"
 
 const meta: Meta<typeof DropdownSelect> = {
   component: DropdownSelect,
 }
 
 export default meta
-type Story = StoryObj<typeof DropdownSelect>
 
 export const Default = {
   args: {

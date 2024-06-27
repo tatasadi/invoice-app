@@ -1,12 +1,11 @@
-import InvoiceListItem from "./invoice-list-item"
-import { Meta, StoryObj } from "@storybook/react"
+import InvoiceListItem from "@/components/invoice-list-item"
+import { Meta } from "@storybook/react"
 
 const meta: Meta<typeof InvoiceListItem> = {
   component: InvoiceListItem,
 }
 
 export default meta
-type Story = StoryObj<typeof InvoiceListItem>
 
 export const Paid = {
   args: {
