@@ -2,7 +2,7 @@ import { Address, Invoice, Item } from "@prisma/client"
 import prisma from "./db"
 import { unstable_noStore as noStore } from "next/cache"
 
-export const ITEMS_PER_PAGE = 10
+export const ITEMS_PER_PAGE = 7
 
 export type InvoiceWithRelations = Invoice & {
   senderAddress: Address

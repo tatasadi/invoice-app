@@ -34,7 +34,7 @@ function createInvoiceWithRelationFromSchema(
     paymentTerms: invoiceData.paymentTerms
       ? parseInt(invoiceData.paymentTerms)
       : 0,
-    status: oldInvoice ? oldInvoice.status : "pending",
+    status: "pending",
     total: invoiceData.items?.reduce(
       (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
       0,
