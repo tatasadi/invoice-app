@@ -40,9 +40,6 @@ Users should be able to:
 - Solution URL:
   [https://github.com/tatasadi/invoice-app](https://github.com/tatasadi/invoice-app)
 
-- Live Site URL:
-  [https://invoice-app-ta.vercel.app](https://invoice-app-ta.vercel.app)
-
 ## My process
 
 ### Built with
