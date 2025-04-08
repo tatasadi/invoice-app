@@ -1,11 +1,21 @@
 export default function Attribution() {
   return (
     <div className="mt-10">
-      <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mx-4 sm:mx-0 text-xs mb-4" role="alert">
-        <strong className="font-bold">Demo Notice:</strong>
-        <span className="block sm:inline"> This website is a demonstration project and is not intended for production use. All data displayed and functionalities provided are for evaluation and testing purposes only. Do not use this site to process or store sensitive or personal information.</span>
-        <span className="block sm:inline"> Use of this website is at your own risk. We make no warranties regarding uptime, data security, or reliability. By proceeding, you agree that the developers, contributors, and associated organizations are not liable for any damages arising from use of this demo site. </span>
+      <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mx-4 sm:mx-0 text-xs mb-4 dark:bg-yellow-900 dark:border-yellow-700 dark:text-yellow-200" role="alert">
+        <strong className="font-bold">Demo Notice: </strong>
+        <span className="block sm:inline">
+          This website is a demonstration project and is not intended for production use.
+          All data displayed and functionalities provided are for evaluation and testing purposes only.
+          Do not use this site to process or store sensitive or personal information.
+        </span>
+              <span className="block sm:inline">
+          Use of this website is at your own risk. We make no warranties regarding uptime,
+          data security, or reliability. By proceeding, you agree that the developers,
+          contributors, and associated organizations are not liable for any damages
+          arising from use of this demo site.
+        </span>
       </div>
+
       <div className=" flex w-full flex-col text-center text-sm sm:flex-row sm:justify-center sm:gap-1">
         <div>
           Challenge by{" "}
