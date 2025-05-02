@@ -1,10 +1,13 @@
-import { PrismaClient } from "@prisma/client"
+require('ts-node/register');
 
-const prisma = new PrismaClient()
+const { connect } = require('../lib/mongoose');
+const Address = require('../models/Address').default;
+const Invoice = require('../models/Invoice').default;
+const Item    = require('../models/Item').default;
+
 
 const invoices = [
   {
-    id: "RT3080",
     createdAt: "2021-08-18",
     paymentDue: "2021-08-19",
     description: "Re-branding",
@@ -35,7 +38,6 @@ const invoices = [
     total: 1800.9,
   },
   {
-    id: "XM9141",
     createdAt: "2021-08-21",
     paymentDue: "2021-09-20",
     description: "Graphic Design",
@@ -56,23 +58,12 @@ const invoices = [
       country: "United Kingdom",
     },
     items: [
-      {
-        name: "Banner Design",
-        quantity: 1,
-        price: 156.0,
-        total: 156.0,
-      },
-      {
-        name: "Email Design",
-        quantity: 2,
-        price: 200.0,
-        total: 400.0,
-      },
+      { name: "Banner Design", quantity: 1, price: 156.0, total: 156.0 },
+      { name: "Email Design", quantity: 2, price: 200.0, total: 400.0 },
     ],
     total: 556.0,
   },
   {
-    id: "RG0314",
     createdAt: "2021-09-24",
     paymentDue: "2021-10-01",
     description: "Website Redesign",
@@ -93,17 +84,11 @@ const invoices = [
       country: "United Kingdom",
     },
     items: [
-      {
-        name: "Website Redesign",
-        quantity: 1,
-        price: 14002.33,
-        total: 14002.33,
-      },
+      { name: "Website Redesign", quantity: 1, price: 14002.33, total: 14002.33 },
     ],
     total: 14002.33,
   },
   {
-    id: "RT2080",
     createdAt: "2021-10-11",
     paymentDue: "2021-10-12",
     description: "Logo Concept",
@@ -124,18 +109,12 @@ const invoices = [
       country: "United Kingdom",
     },
     items: [
-      {
-        name: "Logo Sketches",
-        quantity: 1,
-        price: 102.04,
-        total: 102.04,
-      },
+      { name: "Logo Sketches", quantity: 1, price: 102.04, total: 102.04 },
     ],
     total: 102.04,
   },
   {
-    id: "AA1449",
-    createdAt: "2021-10-7",
+    createdAt: "2021-10-07",
     paymentDue: "2021-10-14",
     description: "Re-branding",
     paymentTerms: 7,
@@ -155,23 +134,12 @@ const invoices = [
       country: "United Kingdom",
     },
     items: [
-      {
-        name: "New Logo",
-        quantity: 1,
-        price: 1532.33,
-        total: 1532.33,
-      },
-      {
-        name: "Brand Guidelines",
-        quantity: 1,
-        price: 2500.0,
-        total: 2500.0,
-      },
+      { name: "New Logo", quantity: 1, price: 1532.33, total: 1532.33 },
+      { name: "Brand Guidelines", quantity: 1, price: 2500.0, total: 2500.0 },
     ],
     total: 4032.33,
   },
   {
-    id: "TY9141",
     createdAt: "2021-10-01",
     paymentDue: "2021-10-31",
     description: "Landing Page Design",
@@ -186,23 +154,17 @@ const invoices = [
       country: "United Kingdom",
     },
     clientAddress: {
-      street: "3964  Queens Lane",
+      street: "3964 Queens Lane",
       city: "Gotham",
       postCode: "60457",
       country: "United States of America",
     },
     items: [
-      {
-        name: "Web Design",
-        quantity: 1,
-        price: 6155.91,
-        total: 6155.91,
-      },
+      { name: "Web Design", quantity: 1, price: 6155.91, total: 6155.91 },
     ],
     total: 6155.91,
   },
   {
-    id: "FV2353",
     createdAt: "2021-11-05",
     paymentDue: "2021-11-12",
     description: "Logo Re-design",
@@ -223,47 +185,48 @@ const invoices = [
       country: "",
     },
     items: [
-      {
-        name: "Logo Re-design",
-        quantity: 1,
-        price: 3102.04,
-        total: 3102.04,
-      },
+      { name: "Logo Re-design", quantity: 1, price: 3102.04, total: 3102.04 },
     ],
     total: 3102.04,
   },
-]
+];
 
 async function main() {
-  for (const invoiceData of invoices) {
-    const { senderAddress, clientAddress, items, ...invoice } = invoiceData
+  await connect();
+  for (const inv of invoices) {
+    // Create addresses
+    const sender = await Address.create(inv.senderAddress);
+    const client = await Address.create(inv.clientAddress);
 
-    const createdInvoice = await prisma.invoice.create({
-      data: {
-        ...invoice,
-        createdAt: new Date(invoice.createdAt),
-        paymentDue: new Date(invoice.paymentDue),
-        senderAddress: {
-          create: senderAddress,
-        },
-        clientAddress: {
-          create: clientAddress,
-        },
-        items: {
-          create: items,
-        },
-      },
-    })
+    // Create invoice, linking addresses
+    const invoice = await Invoice.create({
+      paymentDue: new Date(inv.paymentDue),
+      description: inv.description,
+      paymentTerms: inv.paymentTerms,
+      clientName: inv.clientName,
+      clientEmail: inv.clientEmail,
+      status: inv.status,
+      total: inv.total,
+      invoiceDate: new Date(inv.createdAt),
+      senderAddress: sender._id,
+      clientAddress: client._id,
+    });
 
-    console.log(`Created invoice with id: ${createdInvoice.id}`)
+    // Create items and link to invoice
+    const items = await Promise.all(
+      inv.items.map(i => Item.create({ ...i, invoice: invoice._id }))
+    );
+
+    // Attach item references and save
+    invoice.items = items.map(i => i._id);
+    await invoice.save();
+
+    console.log(`Seeded invoice ${invoice._id}`);
   }
+  process.exit(0);
 }
 
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
+main().catch(err => {
+  console.error('Error seeding data:', err);
+  process.exit(1);
+});

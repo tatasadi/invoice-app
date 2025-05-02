@@ -1,5 +1,5 @@
 import { Address, Invoice, Item } from "@prisma/client"
-import prisma from "./db"
+import prisma from "./mongoose"
 import { unstable_noStore as noStore } from "next/cache"
 
 export const ITEMS_PER_PAGE = 7

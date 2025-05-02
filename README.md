@@ -53,6 +53,8 @@ Users should be able to:
 ![](https://img.shields.io/badge/tailwindcss-fff?style=for-the-badge&logo=tailwindcss&logoColor=fff&color=15b8c5)
 ![](https://img.shields.io/badge/Zod-fff?style=for-the-badge&logo=zod&logoColor=fff&color=3068b7)
 ![](https://img.shields.io/badge/Storybook-fff?style=for-the-badge&logo=storybook&logoColor=fff&color=ff4785)
+![](https://img.shields.io/badge/Azure-fff?style=for-the-badge&logo=azure&logoColor=fff&color=0078d4)
+
 
 ### Code Quality with
 
