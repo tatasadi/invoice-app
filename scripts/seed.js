@@ -1,10 +1,5 @@
-require('ts-node/register');
-
-const { connect } = require('../lib/mongoose');
-const Address = require('../models/Address').default;
-const Invoice = require('../models/Invoice').default;
-const Item    = require('../models/Item').default;
-
+const { ObjectId } = require("mongodb")
+const { getCollection } = require("../lib/db")
 
 const invoices = [
   {
@@ -84,7 +79,12 @@ const invoices = [
       country: "United Kingdom",
     },
     items: [
-      { name: "Website Redesign", quantity: 1, price: 14002.33, total: 14002.33 },
+      {
+        name: "Website Redesign",
+        quantity: 1,
+        price: 14002.33,
+        total: 14002.33,
+      },
     ],
     total: 14002.33,
   },
@@ -189,44 +189,52 @@ const invoices = [
     ],
     total: 3102.04,
   },
-];
-
+]
 async function main() {
-  await connect();
-  for (const inv of invoices) {
-    // Create addresses
-    const sender = await Address.create(inv.senderAddress);
-    const client = await Address.create(inv.clientAddress);
+  const addressCol = await getCollection("addresses")
+  const invoiceCol = await getCollection("invoices")
+  const itemCol = await getCollection("items")
 
-    // Create invoice, linking addresses
-    const invoice = await Invoice.create({
+  for (const inv of invoices) {
+    // 1) Addresses
+    const { insertedId: senderAddressId } = await addressCol.insertOne(
+      inv.senderAddress,
+    )
+    const { insertedId: clientAddressId } = await addressCol.insertOne(
+      inv.clientAddress,
+    )
+
+    // 2) Invoice
+    const { insertedId: invoiceId } = await invoiceCol.insertOne({
+      createdAt: new Date(inv.createdAt),
       paymentDue: new Date(inv.paymentDue),
       description: inv.description,
       paymentTerms: inv.paymentTerms,
       clientName: inv.clientName,
       clientEmail: inv.clientEmail,
       status: inv.status,
+      senderAddressId,
+      clientAddressId,
       total: inv.total,
-      invoiceDate: new Date(inv.createdAt),
-      senderAddress: sender._id,
-      clientAddress: client._id,
-    });
+    })
 
-    // Create items and link to invoice
-    const items = await Promise.all(
-      inv.items.map(i => Item.create({ ...i, invoice: invoice._id }))
-    );
+    // 3) Items
+    const itemsToInsert = inv.items.map((i) => ({
+      invoiceId,
+      name: i.name || "",
+      quantity: i.quantity || 0,
+      price: i.price || 0,
+      total: i.total || 0,
+    }))
+    await itemCol.insertMany(itemsToInsert)
 
-    // Attach item references and save
-    invoice.items = items.map(i => i._id);
-    await invoice.save();
-
-    console.log(`Seeded invoice ${invoice._id}`);
+    console.log(`✓ Seeded invoice ${invoiceId.toHexString()}`)
   }
-  process.exit(0);
+
+  process.exit(0)
 }
 
-main().catch(err => {
-  console.error('Error seeding data:', err);
-  process.exit(1);
-});
+main().catch((err) => {
+  console.error("Seed failed:", err)
+  process.exit(1)
+})
