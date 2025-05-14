@@ -35,4 +35,5 @@ export const invoiceSchema = z.object({
   items: z
     .array(invoiceItemSchema)
     .min(1, { message: "At least one item is required" }),
+  invoiceNumber: z.string(),
 })

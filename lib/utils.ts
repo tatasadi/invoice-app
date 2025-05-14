@@ -13,7 +13,8 @@ export const formatCurrency = (amount: number) => {
   })
 }
 
-export function formatDate(date: Date): string {
+export function formatDate(input: Date | string): string {
+  const date = typeof input === 'string' ? new Date(input) : input
   return format(date, "dd MMM yyyy")
 }
 
@@ -58,4 +59,16 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     "...",
     totalPages,
   ]
+}
+
+export function randomInvoiceNumber() {
+  const letters = Array.from({length:2}, ()=>String.fromCharCode(65 + Math.floor(Math.random()*26))).join('')
+  const digits  = String(Math.floor(Math.random()*10000)).padStart(4,'0')
+  return letters + digits
+}
+
+export function addDays(date: Date, days: number) {
+  const d = new Date(date)
+  d.setDate(d.getDate() + days)
+  return d
 }

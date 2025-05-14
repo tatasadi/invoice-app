@@ -1,13 +1,13 @@
 import Modal from "@/components/modal"
 import InvoiceForm from "@/components/sections/invoice-form"
-import { InvoiceWithRelations } from "@/lib/data"
+import { InvoiceWithRelationsDTO } from "@/models/invoice"
 
 export default function InvoiceEdit({
   goBackComponent,
   invoice,
 }: {
   goBackComponent: React.ReactNode
-  invoice: InvoiceWithRelations
+  invoice: InvoiceWithRelationsDTO
 }) {
   return (
     <Modal>

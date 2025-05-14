@@ -3,7 +3,6 @@ import { deleteInvoiceAction, markInvoiceAsPaidAction } from "@/app/actions"
 import GoBack from "@/components/go-back"
 import StatusBadge from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
-import { InvoiceWithRelations } from "@/lib/data"
 import { formatDate, formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 import {
@@ -16,14 +15,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { InvoiceWithRelationsDTO } from "@/models/invoice"
 
 export default function ViewInvoice({
   invoice,
 }: {
-  invoice: InvoiceWithRelations
+  invoice: InvoiceWithRelationsDTO
 }) {
   const {
     id,
+    invoiceNumber,
     status,
     description,
     senderAddress,
@@ -37,11 +38,11 @@ export default function ViewInvoice({
   } = invoice
 
   async function handleDelete() {
-    await deleteInvoiceAction(id)
+    await deleteInvoiceAction(invoiceNumber)
   }
 
   async function handleMarkAsPaid() {
-    await markInvoiceAsPaidAction(id)
+    await markInvoiceAsPaidAction(invoiceNumber)
   }
 
   return (
@@ -64,7 +65,7 @@ export default function ViewInvoice({
               <DialogHeader>
                 <DialogTitle>Confirm Deletion</DialogTitle>
                 <DialogDescription>
-                  Are you sure you want to delete invoice #{id}? This action
+                  Are you sure you want to delete invoice #{invoiceNumber}? This action
                   cannot be undone.
                 </DialogDescription>
               </DialogHeader>
@@ -85,12 +86,13 @@ export default function ViewInvoice({
           )}
         </div>
       </div>
+
       <div className="mb-28 mt-4 rounded-lg bg-card p-6 shadow-lg sm:p-12">
         <div className="sm:flex sm:justify-between">
           <div>
             <h2>
               <span className="text-secondary">#</span>
-              {id}
+              {invoiceNumber}
             </h2>
             <p className="heading-s text-secondary">{description}</p>
           </div>
@@ -101,6 +103,7 @@ export default function ViewInvoice({
             <p>{senderAddress.country}</p>
           </div>
         </div>
+
         <div className="mt-8 grid grid-cols-2 sm:mt-5 sm:grid-cols-3">
           <div>
             <h3 className="text-secondary">Invoice Date</h3>
@@ -125,6 +128,7 @@ export default function ViewInvoice({
             <p className="mt-3 font-bold">{clientEmail}</p>
           </div>
         </div>
+
         <div className="mt-9 rounded-b-lg bg-light-bg dark:bg-navy-medium sm:mt-11 sm:rounded-t-lg">
           <div className="flex flex-col gap-8 p-8 pb-10">
             <div className="hidden grid-cols-2 justify-items-end font-medium text-secondary sm:grid sm:grid-cols-5">

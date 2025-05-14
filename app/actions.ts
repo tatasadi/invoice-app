@@ -3,7 +3,6 @@
 import { z } from "zod"
 import { invoiceSchema } from "./schema"
 import {
-  InvoiceWithRelations,
   createInvoice,
   deleteInvoice,
   updateInvoice,
@@ -12,12 +11,14 @@ import {
 import { v4 as uuid } from "uuid"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { generateRandomId } from "@/lib/utils"
+import { generateRandomId, randomInvoiceNumber } from "@/lib/utils"
+import { InvoiceWithRelationsDTO } from "@/models/invoice"
+import { addDays } from "date-fns"
 
 function createInvoiceWithRelationFromSchema(
   invoiceData: z.infer<typeof invoiceSchema>,
-  oldInvoice?: InvoiceWithRelations,
-): InvoiceWithRelations {
+  oldInvoice?: InvoiceWithRelationsDTO,
+): InvoiceWithRelationsDTO {
   const senderAddressId = oldInvoice ? oldInvoice.senderAddress.id : uuid()
   const clientAddressId = oldInvoice ? oldInvoice.clientAddress.id : uuid()
   const invoiceId = oldInvoice ? oldInvoice.id : generateRandomId()
@@ -25,12 +26,9 @@ function createInvoiceWithRelationFromSchema(
   return {
     ...invoiceData,
     id: invoiceId,
-    paymentDue: invoiceData.invoiceDate
-      ? new Date(invoiceData.invoiceDate)
-      : null,
-    invoiceDate: invoiceData.invoiceDate
-      ? new Date(invoiceData.invoiceDate)
-      : new Date(),
+    invoiceNumber: invoiceData.invoiceNumber ?? randomInvoiceNumber(),
+    paymentDue: addDays(invoiceData.invoiceDate ? invoiceData.invoiceDate : new Date(), 30).toISOString(),
+    invoiceDate: invoiceData.invoiceDate.toISOString(),
     paymentTerms: invoiceData.paymentTerms
       ? parseInt(invoiceData.paymentTerms)
       : 0,
@@ -39,8 +37,7 @@ function createInvoiceWithRelationFromSchema(
       (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
       0,
     ),
-    createdAt: oldInvoice ? oldInvoice.createdAt : new Date(),
-    updatedAt: new Date(),
+    createdAt: oldInvoice ? oldInvoice.createdAt : new Date().toISOString(),
     senderAddress: {
       ...invoiceData.senderAddress,
       id: senderAddressId,
@@ -49,8 +46,6 @@ function createInvoiceWithRelationFromSchema(
       ...invoiceData.clientAddress,
       id: clientAddressId,
     },
-    senderAddressId: senderAddressId,
-    clientAddressId: clientAddressId,
     items: invoiceData.items.map((item) => ({
       id: uuid(),
       invoiceId: invoiceId,
@@ -98,7 +93,7 @@ export async function deleteInvoiceAction(id: string) {
 }
 
 export async function updateInvoiceAction(
-  invoice: InvoiceWithRelations,
+  invoice: InvoiceWithRelationsDTO,
   data: z.infer<typeof invoiceSchema>,
 ) {
   const validatedFields = invoiceSchema.safeParse(data)

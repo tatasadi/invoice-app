@@ -24,7 +24,7 @@ import { useState, useTransition } from "react"
 import { FaTrash } from "react-icons/fa"
 import { useBreakpoint } from "@/lib/hooks/tailwind"
 import { useRouter } from "next/navigation"
-import { InvoiceWithRelations } from "@/lib/data"
+import { InvoiceWithRelationsDTO } from "@/models/invoice"
 
 type FormErrors = z.inferFormattedError<typeof invoiceSchema>
 
@@ -33,7 +33,7 @@ export default function InvoiceForm({
   invoice = null,
 }: {
   className?: string
-  invoice?: InvoiceWithRelations | null
+  invoice?: InvoiceWithRelationsDTO | null
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -57,7 +57,7 @@ export default function InvoiceForm({
         postCode: invoice?.clientAddress.postCode || "",
         country: invoice?.clientAddress.country || "",
       },
-      invoiceDate: invoice?.invoiceDate || undefined,
+      invoiceDate: invoice ? new Date(invoice.invoiceDate) : undefined,
       paymentTerms: invoice?.paymentTerms?.toString() || "",
       description: invoice?.description || "",
       items: invoice?.items.map((item) => ({

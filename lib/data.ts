@@ -1,255 +1,278 @@
-import { Address, Invoice, Item } from "@prisma/client"
-import prisma from "./db"
-import { unstable_noStore as noStore } from "next/cache"
+import { ObjectId } from 'mongodb'
+import { unstable_noStore as noStore } from 'next/cache'
+import { getCollection } from './db'
+
+import {
+  InvoiceDTO,
+  InvoiceWithRelationsDTO,
+} from '@/models/invoice'
+import { AddressDTO } from "@/models/address"
+import { ItemDTO } from "@/models/item"
+import { randomInvoiceNumber } from "@/lib/utils"
 
 export const ITEMS_PER_PAGE = 7
 
-export type InvoiceWithRelations = Invoice & {
-  senderAddress: Address
-  clientAddress: Address
-  items: Item[]
-}
+async function addressCol() { return getCollection('addresses') }
+async function invoiceCol() { return getCollection('invoices') }
+async function itemCol()    { return getCollection('items')    }
 
+// ——— Fetch paginated invoices (no relations) ———
 export async function fetchLatestInvoices(
   currentPage: number,
   status?: string[],
-): Promise<Invoice[]> {
+): Promise<InvoiceDTO[]> {
   noStore()
-  //await new Promise((resolve) => setTimeout(resolve, 1000))
+  const col = await invoiceCol()
+  const filter = status && status.length ? { status: { $in: status } } : {}
+  const docs = await col
+    .find(filter)
+    .sort({ createdAt: 1 })
+    .skip((currentPage - 1) * ITEMS_PER_PAGE)
+    .limit(ITEMS_PER_PAGE)
+    .toArray()
 
-  try {
-    const invoices = await prisma.invoice.findMany({
-      where: {
-        status: {
-          in: status && status.length > 0 ? status : undefined,
-        },
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-      skip: (currentPage - 1) * ITEMS_PER_PAGE,
-      take: ITEMS_PER_PAGE,
-    })
-
-    const latestInvoices = invoices.map((invoice) => ({
-      ...invoice,
-    }))
-
-    return latestInvoices
-  } catch (error) {
-    console.error("Error retrieving latest invoices:", error)
-    throw new Error("Error retrieving latest invoices")
-  }
+  return docs.map<InvoiceDTO>(doc => ({
+    id:               doc._id.toHexString(),
+    invoiceNumber:    doc.invoiceNumber,
+    createdAt:        doc.createdAt.toISOString(),
+    invoiceDate:      doc.invoiceDate.toISOString(),
+    paymentDue:       doc.paymentDue.toISOString(),
+    description:      doc.description,
+    paymentTerms:     doc.paymentTerms,
+    clientName:       doc.clientName,
+    clientEmail:      doc.clientEmail,
+    status:           doc.status,
+    senderAddressId:  doc.senderAddressId.toHexString(),
+    clientAddressId:  doc.clientAddressId.toHexString(),
+    total:            doc.total,
+  }))
 }
 
-export async function fetchInvoicesCount(): Promise<number> {
+export async function fetchInvoicesCount(status?: string[]): Promise<number> {
   noStore()
-  //await new Promise((resolve) => setTimeout(resolve, 1000))
-
-  try {
-    const count = await prisma.invoice.count()
-    return count
-  } catch (error) {
-    console.error("Error retrieving invoice count:", error)
-    throw new Error("Error retrieving invoice count")
-  }
+  const col = await invoiceCol()
+  const filter = status && status.length ? { status: { $in: status } } : {}
+  return col.countDocuments(filter)
 }
 
-export async function fetchInvoicesPages(status: string[]): Promise<number> {
-  noStore()
-  //await new Promise((resolve) => setTimeout(resolve, 1000))
-
-  try {
-    const count = await prisma.invoice.count({
-      where: {
-        status: {
-          in: status && status.length > 0 ? status : undefined,
-        },
-      },
-    })
-    return Math.ceil(Number(count) / ITEMS_PER_PAGE)
-  } catch (error) {
-    console.error("Error retrieving invoice count:", error)
-    throw new Error("Error retrieving invoice count")
-  }
+export async function fetchInvoicesPages(status?: string[]): Promise<number> {
+  const count = await fetchInvoicesCount(status)
+  return Math.ceil(count / ITEMS_PER_PAGE)
 }
 
-// get invoce by id with sender address and client address and items
+// ——— Fetch single invoice with relations ———
 export async function fetchInvoiceById(
   id: string,
-): Promise<InvoiceWithRelations | null> {
+): Promise<InvoiceWithRelationsDTO | null> {
   noStore()
-  //await new Promise((resolve) => setTimeout(resolve, 1000))
+  const invCol = await invoiceCol()
+  const filter = ObjectId.isValid(id)
+    ? { _id: new ObjectId(id) }
+    : { _id: id }
 
-  try {
-    const invoice = await prisma.invoice.findUnique({
-      where: { id },
-      include: {
-        senderAddress: true,
-        clientAddress: true,
-        items: true,
-      },
-    })
+  const doc = await invCol.findOne(filter)
+  if (!doc) return null
 
-    return invoice || null
-  } catch (error) {
-    console.error("Error retrieving invoice by id:", error)
-    throw new Error("Error retrieving invoice by id")
+  const [rawSender, rawClient, rawItems] = await Promise.all([
+    (await addressCol()).findOne({ _id: doc.senderAddressId }),
+    (await addressCol()).findOne({ _id: doc.clientAddressId }),
+    (await itemCol()).find({ invoiceId: doc._id }).toArray(),
+  ])
+
+  if (!rawSender || !rawClient) {
+    throw new Error('Data inconsistency: missing address')
+  }
+
+  const senderAddress: AddressDTO = {
+    id:       rawSender._id.toHexString(),
+    street:   rawSender.street,
+    city:     rawSender.city,
+    postCode: rawSender.postCode,
+    country:  rawSender.country,
+  }
+
+  const clientAddress: AddressDTO = {
+    id:       rawClient._id.toHexString(),
+    street:   rawClient.street,
+    city:     rawClient.city,
+    postCode: rawClient.postCode,
+    country:  rawClient.country,
+  }
+
+  const items: ItemDTO[] = rawItems.map(item => ({
+    id:        item._id.toHexString(),
+    invoiceId: item.invoiceId.toHexString(),
+    name:      item.name!,
+    quantity:  item.quantity ?? 0,
+    price:     item.price    ?? 0,
+    total:     item.total    ?? 0,
+  }))
+
+  const invoice: Omit<InvoiceDTO, 'senderAddressId' | 'clientAddressId'> = {
+    id:           doc._id.toHexString(),
+    invoiceNumber: doc.invoiceNumber,
+    createdAt:    doc.createdAt.toISOString(),
+    invoiceDate:  doc.invoiceDate.toISOString(),
+    paymentDue:   doc.paymentDue.toISOString(),
+    description:  doc.description,
+    paymentTerms: doc.paymentTerms,
+    clientName:   doc.clientName,
+    clientEmail:  doc.clientEmail,
+    status:       doc.status,
+    total:        doc.total,
+  }
+
+  return {
+    ...invoice,
+    senderAddress,
+    clientAddress,
+    items,
   }
 }
 
-export async function createInvoice(data: InvoiceWithRelations) {
-  //await new Promise((resolve) => setTimeout(resolve, 1000))
-  try {
-    const newInvoice = await prisma.invoice.create({
-      data: {
-        id: data.id,
-        paymentDue: new Date(data.invoiceDate),
-        description: data.description,
+// ——— Create invoice ———
+export async function createInvoice(
+  data: Omit<InvoiceWithRelationsDTO, 'id'>
+): Promise<InvoiceDTO> {
+  const addrCol = await addressCol()
+  const invCol  = await invoiceCol()
+  const itCol   = await itemCol()
+
+  const { insertedId: senderId } = await addrCol.insertOne({
+    street:   data.senderAddress.street,
+    city:     data.senderAddress.city,
+    postCode: data.senderAddress.postCode,
+    country:  data.senderAddress.country,
+  })
+  const { insertedId: clientId } = await addrCol.insertOne({
+    street:   data.clientAddress.street,
+    city:     data.clientAddress.city,
+    postCode: data.clientAddress.postCode,
+    country:  data.clientAddress.country,
+  })
+
+  const invoiceDoc = {
+    createdAt:       new Date(data.createdAt),
+    paymentDue:      new Date(data.paymentDue),
+    invoiceDate:     new Date(data.invoiceDate),
+    description:     data.description,
+    paymentTerms:    data.paymentTerms,
+    clientName:      data.clientName,
+    clientEmail:     data.clientEmail,
+    status:          data.status,
+    senderAddressId: senderId,
+    clientAddressId: clientId,
+    total:           data.total,
+    invoiceNumber: randomInvoiceNumber()
+  }
+  const { insertedId: invoiceId } = await invCol.insertOne(invoiceDoc)
+
+  await itCol.insertMany(data.items.map(i => ({
+    invoiceId,
+    name:     i.name,
+    quantity: i.quantity,
+    price:    i.price,
+    total:    i.total,
+  })))
+
+  return {
+    id:               invoiceId.toHexString(),
+    createdAt:        invoiceDoc.createdAt.toISOString(),
+    invoiceDate:      invoiceDoc.invoiceDate.toISOString(),
+    paymentDue:       invoiceDoc.paymentDue.toISOString(),
+    description:      invoiceDoc.description,
+    paymentTerms:     invoiceDoc.paymentTerms,
+    clientName:       invoiceDoc.clientName,
+    clientEmail:      invoiceDoc.clientEmail,
+    status:           invoiceDoc.status,
+    senderAddressId:  senderId.toHexString(),
+    clientAddressId:  clientId.toHexString(),
+    total:            invoiceDoc.total,
+    invoiceNumber:    invoiceDoc.invoiceNumber,
+  }
+}
+
+// ——— Update invoice ———
+export async function updateInvoice(
+  data: InvoiceWithRelationsDTO
+): Promise<void> {
+  const addrCol = await addressCol()
+  const invCol  = await invoiceCol()
+  const itCol   = await itemCol()
+  const oid     = new ObjectId(data.id)
+
+  await Promise.all([
+    addrCol.updateOne(
+      { _id: new ObjectId(data.senderAddress.id) },
+      { $set: {
+          street:   data.senderAddress.street,
+          city:     data.senderAddress.city,
+          postCode: data.senderAddress.postCode,
+          country:  data.senderAddress.country,
+        }},
+    ),
+    addrCol.updateOne(
+      { _id: new ObjectId(data.clientAddress.id) },
+      { $set: {
+          street:   data.clientAddress.street,
+          city:     data.clientAddress.city,
+          postCode: data.clientAddress.postCode,
+          country:  data.clientAddress.country,
+        }},
+    ),
+  ])
+
+  await invCol.updateOne(
+    { _id: oid },
+    { $set: {
+        paymentDue:   new Date(data.paymentDue),
+        description:  data.description,
         paymentTerms: data.paymentTerms,
-        clientName: data.clientName,
-        clientEmail: data.clientEmail,
-        status: data.status,
-        total: data.total,
-        senderAddress: {
-          create: {
-            street: data.senderAddress.street,
-            city: data.senderAddress.city,
-            postCode: data.senderAddress.postCode,
-            country: data.senderAddress.country,
-          },
-        },
-        clientAddress: {
-          create: {
-            street: data.clientAddress.street,
-            city: data.clientAddress.city,
-            postCode: data.clientAddress.postCode,
-            country: data.clientAddress.country,
-          },
-        },
-        items: {
-          create: data.items.map((item: any) => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            total: item.quantity * item.price,
-          })),
-        },
-      },
-    })
-  } catch (error) {
-    console.error("Error creating invoice:", error)
-    return {
-      message: "Database Error: Failed to Create Invoice.",
-    }
-  }
+        clientName:   data.clientName,
+        clientEmail:  data.clientEmail,
+        status:       data.status,
+        total:        data.total,
+        invoiceDate:  new Date(data.invoiceDate),
+      }},
+  )
+
+  await itCol.deleteMany({ invoiceId: oid })
+  await itCol.insertMany(data.items.map(i => ({
+    invoiceId: oid,
+    name:      i.name,
+    quantity:  i.quantity,
+    price:     i.price,
+    total:     i.total,
+  })))
 }
 
-export async function deleteInvoice(invoiceId: string) {
-  try {
-    // First, delete all related items
-    await prisma.item.deleteMany({
-      where: { invoiceId },
-    })
+// ——— Delete invoice ———
+export async function deleteInvoice(id: string): Promise<void> {
+  const addrCol = await addressCol()
+  const invCol  = await invoiceCol()
+  const itCol   = await itemCol()
+  const oid     = new ObjectId(id)
 
-    // Fetch the related addresses before deleting the invoice
-    const invoice = await prisma.invoice.findUnique({
-      where: { id: invoiceId },
-      include: { senderAddress: true, clientAddress: true },
-    })
+  await itCol.deleteMany({ invoiceId: oid })
 
-    // Delete the invoice first to remove foreign key constraints
-    await prisma.invoice.delete({
-      where: { id: invoiceId },
-    })
+  const invoice = await invCol.findOne({ _id: oid })
+  if (!invoice) return
 
-    if (invoice) {
-      // Then delete the related addresses
-      await prisma.address.delete({
-        where: { id: invoice.senderAddressId },
-      })
-
-      await prisma.address.delete({
-        where: { id: invoice.clientAddressId },
-      })
-    }
-  } catch (error) {
-    console.error("Error deleting invoice with relations:", error)
-  } finally {
-    await prisma.$disconnect()
-  }
+  await invCol.deleteOne({ _id: oid })
+  await Promise.all([
+    addrCol.deleteOne({ _id: invoice.senderAddressId }),
+    addrCol.deleteOne({ _id: invoice.clientAddressId }),
+  ])
 }
 
-export async function updateInvoice(data: InvoiceWithRelations) {
-  try {
-    // Update invoice with all its relations
-    await prisma.invoice.update({
-      where: { id: data.id },
-      data: {
-        paymentDue: new Date(data.invoiceDate),
-        description: data.description,
-        paymentTerms: data.paymentTerms,
-        clientName: data.clientName,
-        clientEmail: data.clientEmail,
-        status: data.status,
-        total: data.total,
-        senderAddress: {
-          update: {
-            where: { id: data.senderAddress.id },
-            data: {
-              street: data.senderAddress.street,
-              city: data.senderAddress.city,
-              postCode: data.senderAddress.postCode,
-              country: data.senderAddress.country,
-            },
-          },
-        },
-        clientAddress: {
-          update: {
-            where: { id: data.clientAddress.id },
-            data: {
-              street: data.clientAddress.street,
-              city: data.clientAddress.city,
-              postCode: data.clientAddress.postCode,
-              country: data.clientAddress.country,
-            },
-          },
-        },
-        items: {
-          deleteMany: {}, // Delete existing items
-          create: data.items.map((item) => ({
-            id: item.id,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            total: (item.quantity || 0) * (item.price || 0),
-          })),
-        },
-      },
-    })
-    return {
-      message: "Invoice updated successfully",
-    }
-  } catch (error) {
-    console.error("Error updating invoice with relations:", error)
-    return {
-      message: "Database Error: Failed to Update Invoice.",
-    }
-  }
-}
-
+// ——— Update only status ———
 export async function updateInvoiceStatus(
   id: string,
   status: string,
-): Promise<{ message: string }> {
-  try {
-    await prisma.invoice.update({
-      where: { id },
-      data: { status },
-    })
-    return { message: "Invoice status updated successfully" }
-  } catch (error) {
-    console.error("Error updating invoice status:", error)
-    return { message: "Database Error: Failed to Update Invoice Status." }
-  }
+): Promise<void> {
+  const invCol = await invoiceCol()
+  await invCol.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { status } },
+  )
 }

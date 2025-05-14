@@ -1,17 +1,17 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { ObjectId } from "mongodb"
 
-export interface IAddress extends Document {
-  street: string;
-  city: string;
-  postCode: string;
-  country: string;
+export interface Address {
+  _id: ObjectId
+  street?: string
+  city?: string
+  postCode?: string
+  country?: string
 }
 
-const addressSchema = new Schema<IAddress>({
-  street:   { type: String, default: '' },
-  city:     { type: String, default: '' },
-  postCode: { type: String, default: '' },
-  country:  { type: String, default: '' }
-});
-
-export default mongoose.models.Address || mongoose.model<IAddress>('Address', addressSchema);
+export interface AddressDTO {
+  id: string
+  street?: string
+  city?: string
+  postCode?: string
+  country?: string
+}
