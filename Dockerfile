@@ -1,73 +1,67 @@
-# syntax=docker.io/docker/dockerfile:1
+# syntax=docker/dockerfile:1.7-labs
 
-# Use a Debian-based Node 18 image (Bullseye slim)
-FROM node:18-bullseye-slim AS base
-
-# Update package lists and install libssl1.1 if needed.
-# (Bullseye typically includes libssl1.1, but this ensures it's present.)
-RUN apt-get update && apt-get install -y libssl1.1 && rm -rf /var/lib/apt/lists/*
-
+# 1) Builder - use build platform for compilation
+FROM --platform=$BUILDPLATFORM node:20-alpine AS builder
 WORKDIR /app
 
-# -------------------------------
-# Dependencies Stage
-# -------------------------------
-FROM base AS deps
-# Copy only the package and lock files
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+# Install dependencies needed for Prisma and native packages
+RUN apk add --no-cache libc6-compat openssl
 
+# Copy package files and Prisma schema
+COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
 COPY prisma ./prisma
 
-# Install dependencies with the preferred package manager.
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Install dependencies with the preferred package manager
+RUN if [ -f yarn.lock ]; then corepack enable && corepack prepare yarn@stable --activate && yarn --frozen-lockfile; \
+    elif [ -f pnpm-lock.yaml ]; then corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile; \
+    else npm ci; fi
 
-# -------------------------------
-# Build Stage
-# -------------------------------
-FROM base AS builder
-WORKDIR /app
-# Copy the node_modules from the deps stage.
-COPY --from=deps /app/node_modules ./node_modules
-# Copy the entire project (ensure your .dockerignore allows needed files, e.g. the prisma folder).
+# Copy source code
 COPY . .
-# Build the Next.js application.
-RUN \
-  if [ -f yarn.lock ]; then yarn run build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
 
-# -------------------------------
-# Runner / Production Stage
-# -------------------------------
-FROM base AS runner
+# Disable Next.js telemetry
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Build the application (this includes Prisma generate from package.json build script)
+RUN \
+  if [ -f yarn.lock ]; then corepack enable && yarn build; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable && pnpm run build; \
+  else npm run build; fi
+
+# 2) Runner (production image)
+FROM --platform=$TARGETPLATFORM node:20-alpine AS runner
 WORKDIR /app
 
-# Set production environment variable.
+# Set production environment
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create a system group and user for running the app.
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+# Install OpenSSL for Prisma (required for database connections)
+RUN apk add --no-cache openssl
 
-# Copy static assets and the standalone output from the builder stage.
+# Create a non-root user
+RUN addgroup -S nextjs && adduser -S nextjs -G nextjs
+
+# Copy built application from builder stage
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Switch to a non-root user.
+# Copy Prisma client and schema (needed for database operations)
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/prisma ./prisma
+
+# Create cache directory with proper ownership
+RUN mkdir -p .next/cache && chown -R nextjs:nextjs .next
+
+# Expose port
+EXPOSE 3000
+
+# Use non-root user
 USER nextjs
 
-# Expose the port on which the Next.js server runs.
-EXPOSE 3000
+# Start the Next.js server
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-
-# Start the server.
 CMD ["node", "server.js"]
